@@ -615,7 +615,7 @@
   <div class="wrap">
     <div class="section-head">
       <div class="eyebrow">обратная связь</div>
-      <h2>Личный проект без публичного релиза - но если интересно, напишите</h2>
+      <h2>Хотите установить себе? Оставьте заявку - я вышлю вам исходники</h2>
     </div>
     <form class="feedback-form" id="feedbackForm" novalidate>
       <div class="f-row">
@@ -628,7 +628,7 @@
       </div>
       <div class="f-row">
         <label for="fbMessage">Сообщение</label>
-        <textarea id="fbMessage" name="message" rows="5" maxlength="4000" placeholder="Что случилось или что хотелось бы видеть в LoMeet" required></textarea>
+        <textarea id="fbMessage" name="message" rows="5" maxlength="4000" placeholder="Пара слов о том, зачем нужен LoMeet - macOS какой версии, Apple Silicon или Intel" required></textarea>
       </div>
       <div class="f-actions">
         <button type="submit" class="btn btn-primary">Написать</button>
@@ -669,7 +669,7 @@
       return;
     }
 
-    var subject = "LoMeet - сообщение с сайта" + (name ? " от " + name : "");
+    var subject = "LoMeet - заявка на исходники" + (name ? " от " + name : "");
     var bodyLines = [];
     if (email) bodyLines.push("Ответить на: " + email);
     bodyLines.push("");
