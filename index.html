@@ -1,0 +1,690 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="LoMeet — локальный рекордер встреч для macOS: запись, расшифровка и саммари прямо на устройстве, без бота в звонке и без облака.">
+<title>LoMeet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600;700;800&family=Oswald:wght@400;500;600&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#14120f;
+    --bg-raised:#1c1915;
+    --bg-panel:#211d18;
+    --ink:#f2eee6;
+    --ink-soft:#b8af9f;
+    --ink-faint:#7a7266;
+    --line:#332d25;
+    --line-soft:#241f1a;
+    --accent:#e8a33d;
+    --accent-bright:#ffc466;
+    --accent-ink:#1c1200;
+    --accent-dim:#4a3115;
+    --accent-glow:rgba(232,163,61,0.35);
+    --good:#8fb87f;
+    --bad:#c98a72;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"PT Sans","Segoe UI",sans-serif;
+    font-size:17px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(ellipse 900px 480px at 50% -120px, rgba(232,163,61,0.10), transparent 60%);
+  }
+  ::selection{background:var(--accent-dim);color:var(--accent-bright);}
+
+  h1,h2,h3{
+    font-family:"Unbounded","PT Sans",sans-serif;
+    line-height:1.14;
+    text-wrap:balance;
+    margin:0;
+    color:var(--ink);
+    font-weight:700;
+  }
+  .eyebrow{
+    font-family:"Oswald","PT Sans",sans-serif;
+    font-weight:500;
+    font-size:13px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--accent);
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:8px;height:8px;
+    border-radius:50%;
+    background:var(--accent);
+    box-shadow:0 0 0 3px var(--accent-dim);
+    flex:none;
+  }
+  a{color:var(--accent-bright);}
+  a:focus-visible, button:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:3px;}
+  code{
+    font-family:"Oswald",monospace;
+    background:var(--bg-panel);
+    border:1px solid var(--line);
+    padding:1px 7px;
+    border-radius:4px;
+    font-size:0.88em;
+    color:var(--accent-bright);
+    letter-spacing:.01em;
+  }
+
+  .wrap{max-width:1080px;margin:0 auto;padding:0 28px;}
+  .prose{max-width:62ch;}
+
+  section{padding:96px 0;border-top:1px solid var(--line-soft);}
+  section:first-of-type{border-top:none;}
+  @media (max-width:720px){ section{padding:64px 0;} }
+
+  .btn{
+    font-family:"Oswald","PT Sans",sans-serif;
+    font-weight:500;
+    font-size:15px;
+    letter-spacing:.03em;
+    text-transform:uppercase;
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    gap:9px;
+    padding:14px 24px;
+    border-radius:8px;
+    border:1px solid transparent;
+    cursor:pointer;
+    transition:transform .15s ease, box-shadow .15s ease, background .15s ease;
+  }
+  .btn:hover{transform:translateY(-1px);}
+  .btn-primary{background:var(--accent);color:var(--accent-ink);box-shadow:0 8px 24px -8px var(--accent-glow);}
+  .btn-primary:hover{background:var(--accent-bright);box-shadow:0 10px 28px -6px var(--accent-glow);}
+  .btn-ghost{background:transparent;color:var(--ink);border-color:var(--line);}
+  .btn-ghost:hover{border-color:var(--ink-soft);}
+
+  /* ---------- top bar ---------- */
+  .topbar{
+    position:sticky;top:0;z-index:20;
+    background:rgba(20,18,15,0.82);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line-soft);
+  }
+  .topbar .wrap{
+    display:flex;align-items:center;justify-content:space-between;
+    padding-top:16px;padding-bottom:16px;
+  }
+  .brand{
+    display:flex;align-items:center;gap:10px;
+    font-family:"Unbounded",sans-serif;font-weight:700;font-size:18px;
+    letter-spacing:-.01em;
+  }
+  .brand .dot{
+    width:11px;height:11px;border-radius:50%;
+    background:var(--accent);
+    box-shadow:0 0 12px 1px var(--accent-glow);
+    animation:pulse 2.4s ease-in-out infinite;
+  }
+  .navlinks{display:flex;gap:28px;font-family:"Oswald",sans-serif;font-size:13.5px;letter-spacing:.05em;text-transform:uppercase;}
+  .navlinks a{color:var(--ink-soft);text-decoration:none;}
+  .navlinks a:hover{color:var(--ink);}
+  @media (max-width:640px){ .navlinks{display:none;} }
+
+  @keyframes pulse{
+    0%,100%{opacity:1;} 50%{opacity:.35;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .brand .dot{animation:none;}
+  }
+
+  /* ---------- hero ---------- */
+  .hero{padding-top:76px;}
+  .hero-grid{
+    display:grid;
+    grid-template-columns:1.05fr 0.95fr;
+    gap:56px;
+    align-items:center;
+  }
+  @media (max-width:920px){ .hero-grid{grid-template-columns:1fr;} }
+
+  .hero h1{
+    font-size:clamp(34px,5.2vw,58px);
+    margin-top:18px;
+    letter-spacing:-.015em;
+  }
+  .hero h1 .accent-word{color:var(--accent);}
+  .hero .lede{
+    margin-top:22px;
+    font-size:18.5px;
+    color:var(--ink-soft);
+    max-width:46ch;
+  }
+  .hero-ctas{display:flex;gap:14px;margin-top:34px;flex-wrap:wrap;}
+  .hero-meta{
+    margin-top:26px;
+    font-family:"Oswald",sans-serif;
+    font-size:13px;
+    letter-spacing:.03em;
+    color:var(--ink-faint);
+    display:flex;gap:8px;flex-wrap:wrap;align-items:center;
+  }
+
+  /* ---------- mock menu-bar panel ---------- */
+  .mock{
+    background:linear-gradient(180deg, var(--bg-panel), var(--bg-raised));
+    border:1px solid var(--line);
+    border-radius:16px;
+    box-shadow:0 40px 80px -30px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.03);
+    overflow:hidden;
+  }
+  .mock-title{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 18px;
+    border-bottom:1px solid var(--line-soft);
+    font-family:"Oswald",sans-serif;font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);
+  }
+  .mock-title .rec{
+    display:flex;align-items:center;gap:7px;
+    color:var(--accent-bright);
+  }
+  .rec-dot{width:7px;height:7px;border-radius:50%;background:var(--accent-bright);animation:pulse 1.4s ease-in-out infinite;}
+  @media (prefers-reduced-motion: reduce){ .rec-dot{animation:none;} }
+
+  .mock-tabs{
+    display:flex;gap:4px;
+    padding:10px 14px 0;
+    font-family:"Oswald",sans-serif;font-size:12.5px;letter-spacing:.04em;text-transform:uppercase;
+  }
+  .mock-tabs span{
+    padding:8px 12px;
+    color:var(--ink-faint);
+    border-bottom:2px solid transparent;
+  }
+  .mock-tabs span.active{color:var(--ink);border-bottom-color:var(--accent);}
+
+  .mock-body{padding:20px 20px 24px;}
+  .meter-row{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+  .meter-row:last-of-type{margin-bottom:22px;}
+  .meter-label{
+    width:118px;flex:none;
+    font-family:"Oswald",sans-serif;font-size:12px;letter-spacing:.03em;color:var(--ink-soft);
+  }
+  .meter-track{
+    flex:1;height:8px;border-radius:5px;
+    background:var(--line-soft);
+    overflow:hidden;
+    display:flex;align-items:center;
+  }
+  .meter-fill{
+    height:100%;border-radius:5px;
+    background:linear-gradient(90deg, var(--accent-dim), var(--accent) 70%, var(--accent-bright));
+    animation:meter1 2.6s ease-in-out infinite;
+    transform-origin:left;
+  }
+  .meter-fill.b{animation-name:meter2;animation-duration:3.1s;}
+  @keyframes meter1{
+    0%,100%{width:22%;} 30%{width:68%;} 55%{width:38%;} 78%{width:82%;}
+  }
+  @keyframes meter2{
+    0%,100%{width:14%;} 25%{width:44%;} 60%{width:30%;} 85%{width:58%;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .meter-fill, .meter-fill.b{animation:none;width:46%;}
+  }
+
+  .mock-cta{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 16px;
+    background:var(--bg-raised);
+    border:1px solid var(--line);
+    border-radius:10px;
+  }
+  .mock-cta .timer{font-family:"Oswald",sans-serif;font-size:15px;color:var(--ink);letter-spacing:.03em;}
+  .mock-stop{
+    font-family:"Oswald",sans-serif;font-size:12px;text-transform:uppercase;letter-spacing:.05em;
+    background:var(--accent-dim);color:var(--accent-bright);
+    border:1px solid var(--accent);
+    padding:8px 14px;border-radius:7px;
+  }
+  .mock-foot{
+    padding:11px 20px;
+    border-top:1px solid var(--line-soft);
+    font-family:"Oswald",sans-serif;font-size:11px;letter-spacing:.03em;color:var(--ink-faint);
+    display:flex;justify-content:space-between;
+  }
+
+  /* ---------- section headers ---------- */
+  .section-head{max-width:56ch;margin-bottom:52px;}
+  .section-head h2{font-size:clamp(26px,3.4vw,36px);margin-top:14px;}
+  .section-head p{margin-top:14px;color:var(--ink-soft);font-size:17px;}
+
+  /* ---------- feature grid ---------- */
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden;}
+  @media (max-width:860px){ .grid{grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:600px){ .grid{grid-template-columns:1fr;} }
+  .card{background:var(--bg-raised);padding:28px 26px;}
+  .card .num{font-family:"Oswald",sans-serif;font-size:12px;letter-spacing:.08em;color:var(--accent);}
+  .card h3{font-family:"PT Sans",sans-serif;font-weight:700;font-size:18px;margin-top:12px;}
+  .card p{margin-top:10px;color:var(--ink-soft);font-size:15px;line-height:1.55;}
+
+  /* ---------- comparison table ---------- */
+  .table-shell{border:1px solid var(--line);border-radius:14px;overflow:auto;background:var(--bg-raised);}
+  table{border-collapse:collapse;width:100%;min-width:620px;font-size:15.5px;}
+  thead th{
+    font-family:"Oswald",sans-serif;font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;
+    text-align:left;padding:18px 20px;color:var(--ink-faint);border-bottom:1px solid var(--line);
+  }
+  thead th.col-lomeet{color:var(--accent-bright);}
+  tbody td, tbody th{padding:16px 20px;border-bottom:1px solid var(--line-soft);text-align:left;font-weight:400;}
+  tbody tr:last-child td, tbody tr:last-child th{border-bottom:none;}
+  tbody th{font-family:"PT Sans",sans-serif;font-weight:700;color:var(--ink);white-space:nowrap;}
+  td.lomeet{color:var(--ink);font-weight:700;background:var(--accent-dim);}
+  td.cloud{color:var(--ink-soft);}
+  .mark{display:inline-flex;align-items:center;gap:8px;}
+  .mark::before{font-family:"Oswald",sans-serif;font-weight:600;}
+  .mark.yes::before{content:"✓";color:var(--good);}
+  .mark.no::before{content:"✕";color:var(--bad);}
+  .table-note{margin-top:16px;font-size:13.5px;color:var(--ink-faint);max-width:64ch;}
+
+  /* ---------- ask spotlight ---------- */
+  .ask-wrap{display:grid;grid-template-columns:1fr 1fr;gap:52px;align-items:center;}
+  @media (max-width:860px){ .ask-wrap{grid-template-columns:1fr;} }
+  .chat{
+    background:var(--bg-raised);border:1px solid var(--line);border-radius:14px;
+    padding:20px;display:flex;flex-direction:column;gap:14px;
+  }
+  .bubble{padding:13px 16px;border-radius:11px;font-size:15px;line-height:1.5;max-width:88%;}
+  .bubble.q{background:var(--bg-panel);align-self:flex-end;color:var(--ink);border:1px solid var(--line);}
+  .bubble.a{background:var(--accent-dim);color:var(--ink);border:1px solid var(--accent-dim);}
+  .bubble.a .src{
+    display:block;margin-top:10px;font-family:"Oswald",sans-serif;font-size:11.5px;letter-spacing:.03em;
+    color:var(--accent-bright);text-transform:uppercase;
+  }
+
+  /* ---------- preview mockups ---------- */
+  .preview-grid{display:grid;grid-template-columns:1fr 1fr;gap:28px;}
+  @media (max-width:780px){ .preview-grid{grid-template-columns:1fr;} }
+  .mock.small .mock-body{padding:22px 20px;}
+  .summary-h{font-family:"Oswald",sans-serif;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;}
+  .summary-h.second{margin-top:20px;}
+  .summary-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:9px;}
+  .summary-list li{font-size:14.5px;color:var(--ink-soft);padding-left:16px;position:relative;line-height:1.45;}
+  .summary-list li::before{content:"";position:absolute;left:0;top:9px;width:6px;height:1px;background:var(--ink-faint);}
+  .summary-list li b{color:var(--ink);}
+  .settings-row{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:12px 0;border-bottom:1px solid var(--line-soft);font-size:14px;}
+  .settings-row:last-child{border-bottom:none;}
+  .settings-row .settings-key{color:var(--ink-faint);font-family:"Oswald",sans-serif;font-size:12px;letter-spacing:.03em;text-transform:uppercase;flex:none;}
+  .settings-row .settings-val{color:var(--ink);font-family:"PT Sans",sans-serif;text-align:right;}
+
+  /* ---------- feedback form ---------- */
+  .feedback-form{display:flex;flex-direction:column;gap:20px;max-width:620px;}
+  .f-row{display:flex;flex-direction:column;gap:8px;}
+  .f-row label{font-family:"Oswald",sans-serif;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-soft);}
+  .f-row input, .f-row textarea{
+    background:var(--bg-raised);border:1px solid var(--line);border-radius:8px;
+    padding:12px 14px;color:var(--ink);font-family:"PT Sans",sans-serif;font-size:15px;
+    resize:vertical;
+  }
+  .f-row input::placeholder, .f-row textarea::placeholder{color:var(--ink-faint);}
+  .f-row input:focus, .f-row textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim);}
+  .f-actions{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:4px;}
+  .f-hint{font-size:13px;color:var(--ink-faint);max-width:36ch;}
+  .f-status{font-size:13px;color:var(--accent-bright);font-family:"Oswald",sans-serif;letter-spacing:.02em;}
+
+  /* ---------- stack strip ---------- */
+  .stack{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px;}
+  .chip{
+    font-family:"Oswald",sans-serif;font-size:13px;letter-spacing:.03em;
+    border:1px solid var(--line);border-radius:100px;padding:9px 16px;color:var(--ink-soft);
+    background:var(--bg-raised);
+  }
+  .chip b{color:var(--ink);font-weight:600;}
+
+  /* ---------- closing ---------- */
+  .closing{text-align:left;}
+  .closing h2{font-size:clamp(28px,4vw,42px);max-width:16ch;}
+  .closing-row{display:flex;justify-content:space-between;align-items:flex-end;gap:32px;flex-wrap:wrap;margin-top:30px;}
+
+  footer.site{
+    border-top:1px solid var(--line-soft);
+    padding:36px 0;
+  }
+  footer.site .wrap{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
+  footer.site .brand{font-size:15px;}
+  footer.site .fine{font-family:"Oswald",sans-serif;font-size:12px;letter-spacing:.04em;color:var(--ink-faint);}
+</style>
+</head>
+<body>
+
+
+<div class="topbar">
+  <div class="wrap">
+    <div class="brand"><span class="dot"></span>LoMeet</div>
+    <nav class="navlinks">
+      <a href="#features">Что внутри</a>
+      <a href="#compare">Сравнение</a>
+      <a href="#ask">Спросить</a>
+      <a href="#stack">Начинка</a>
+      <a href="#feedback">Написать</a>
+    </nav>
+  </div>
+</div>
+
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-grid">
+      <div>
+        <div class="eyebrow">меню-бар · macOS</div>
+        <h1>Встреча.<br>Ваш Mac.<br><span class="accent-word">Больше никто.</span></h1>
+        <p class="lede">LoMeet записывает звонок, расшифровывает и собирает саммари прямо на вашем компьютере. Без бота в списке участников, без загрузки на сервер, без аккаунта.</p>
+        <div class="hero-ctas">
+          <a class="btn btn-primary" href="#compare">Сравнить с облачными ботами</a>
+          <a class="btn btn-ghost" href="#stack">Как это устроено</a>
+        </div>
+        <div class="hero-meta">
+          <span>живёт в меню-баре</span><span>·</span>
+          <span>записи - в <code>~/Library/Application Support</code></span><span>·</span>
+          <span>ничего не уходит с машины</span>
+        </div>
+      </div>
+
+      <div class="mock" role="img" aria-label="Стилизованный макет выпадающей панели LoMeet в меню-баре: индикатор записи, таймер, уровни микрофона и звука встречи, кнопка остановки">
+        <div class="mock-title">
+          <span>LoMeet</span>
+          <span class="rec"><span class="rec-dot"></span>ЗАПИСЬ</span>
+        </div>
+        <div class="mock-tabs">
+          <span class="active">Запись</span>
+          <span>Спросить</span>
+          <span>Настройки</span>
+        </div>
+        <div class="mock-body">
+          <div class="meter-row">
+            <span class="meter-label">Микрофон</span>
+            <span class="meter-track"><span class="meter-fill"></span></span>
+          </div>
+          <div class="meter-row">
+            <span class="meter-label">Звук встречи</span>
+            <span class="meter-track"><span class="meter-fill b"></span></span>
+          </div>
+          <div class="mock-cta">
+            <span class="timer">24:18</span>
+            <span class="mock-stop">Остановить</span>
+          </div>
+        </div>
+        <div class="mock-foot">
+          <span>v0.10.0 · сборка 97</span>
+          <span>3 встречи сегодня</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="features">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">что внутри</div>
+      <h2>Всё, что обычно делает облако - только не в облаке</h2>
+      <p>Захват, расшифровка, разбор по спикерам, саммари и поиск по истории встреч - каждый этап выполняется локально, теми же движками, что стоят за большими сервисами, только без сети.</p>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <div class="num">01</div>
+        <h3>Запись без бота</h3>
+        <p>Никто не видит участника «LoMeet Notetaker» в списке звонящих - потому что его там нет. Звук пишется прямо с устройства через ffmpeg, мимо API площадки видеосвязи.</p>
+      </div>
+      <div class="card">
+        <div class="num">02</div>
+        <h3>Расшифровка на месте</h3>
+        <p>faster-whisper распознаёт речь прямо на Mac. Аудиофайл никогда не покидает диск - его не нужно никуда загружать, чтобы получить текст.</p>
+      </div>
+      <div class="card">
+        <div class="num">03</div>
+        <h3>Кто говорит</h3>
+        <p>Разбор по спикерам - тоже локально, sherpa-onnx, без аккаунта и токена доступа. Просто работает после первого запуска.</p>
+      </div>
+      <div class="card">
+        <div class="num">04</div>
+        <h3>Саммари локальной моделью</h3>
+        <p>Ollama строит саммари прямо на устройстве - без ключа OpenAI, без счёта за токены, без отправки транскрипта куда-либо.</p>
+      </div>
+      <div class="card">
+        <div class="num">05</div>
+        <h3>Выбор источника</h3>
+        <p>Экран, конкретное окно или только звук - с превью, как в Zoom или Meet, а не сухой список системных устройств.</p>
+      </div>
+      <div class="card">
+        <div class="num">06</div>
+        <h3>Спросить</h3>
+        <p>Чат по всей истории встреч с переходом к нужному моменту записи по клику - см. следующий раздел.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="preview">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">как это выглядит</div>
+      <h2>Те же поля, что и в реальном приложении</h2>
+      <p>Макет вместо скриншота - чтобы на публичную страницу не попало содержимое настоящих встреч.</p>
+    </div>
+    <div class="preview-grid">
+      <div class="mock small" role="img" aria-label="Макет карточки саммари встречи: резюме и список задач по участникам">
+        <div class="mock-title"><span>Саммари встречи</span><span style="color:var(--ink-faint);">31.08, 13:01</span></div>
+        <div class="mock-body">
+          <div class="summary-h">Резюме</div>
+          <ul class="summary-list">
+            <li>Согласовали перенос релиза каталога на вторник</li>
+            <li>Блокер - приёмка карточек товара не готова к среде</li>
+          </ul>
+          <div class="summary-h second">Задачи</div>
+          <ul class="summary-list">
+            <li><b>Виктор</b> - доделать карточки до пятницы</li>
+            <li><b>Полина</b> - согласовать текст с заказчиком</li>
+          </ul>
+        </div>
+      </div>
+      <div class="mock small" role="img" aria-label="Макет вкладки настроек: выбор микрофона, звука встречи, экрана и модели распознавания">
+        <div class="mock-title"><span>Настройки</span></div>
+        <div class="mock-body">
+          <div class="settings-row"><span class="settings-key">Микрофон</span><span class="settings-val">Микрофон MacBook Air</span></div>
+          <div class="settings-row"><span class="settings-key">Звук встречи</span><span class="settings-val">BlackHole 2ch</span></div>
+          <div class="settings-row"><span class="settings-key">Экран</span><span class="settings-val">Не записывать</span></div>
+          <div class="settings-row"><span class="settings-key">Модель Whisper</span><span class="settings-val">medium</span></div>
+          <div class="settings-row"><span class="settings-key">По спикерам</span><span class="settings-val">Включено</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="compare">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">сравнение</div>
+      <h2>Разница - не в списке функций, а в том, куда уходит звук</h2>
+      <p>Большинство сервисов записи встреч устроены одинаково: бот-участник заходит в звонок, а обработка - расшифровка, саммари - происходит на серверах вендора. LoMeet устроен иначе на уровне архитектуры.</p>
+    </div>
+
+    <div class="table-shell">
+      <table>
+        <thead>
+          <tr>
+            <th>Что происходит</th>
+            <th class="col-lomeet">LoMeet</th>
+            <th>Типичный облачный бот</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th>Кто виден в списке участников</th>
+            <td class="lomeet"><span class="mark yes">никто</span></td>
+            <td class="cloud"><span class="mark no">бот-участник</span></td>
+          </tr>
+          <tr>
+            <th>Куда уходит звук</th>
+            <td class="lomeet"><span class="mark yes">остаётся на устройстве</span></td>
+            <td class="cloud"><span class="mark no">на сервер вендора</span></td>
+          </tr>
+          <tr>
+            <th>Где расшифровка и саммари</th>
+            <td class="lomeet"><span class="mark yes">локально, на Mac</span></td>
+            <td class="cloud"><span class="mark no">в облаке</span></td>
+          </tr>
+          <tr>
+            <th>Нужен аккаунт</th>
+            <td class="lomeet"><span class="mark yes">нет</span></td>
+            <td class="cloud"><span class="mark no">да</span></td>
+          </tr>
+          <tr>
+            <th>Работает офлайн</th>
+            <td class="lomeet"><span class="mark yes">да, после установки моделей</span></td>
+            <td class="cloud"><span class="mark no">нет</span></td>
+          </tr>
+          <tr>
+            <th>Стоимость</th>
+            <td class="lomeet"><span class="mark yes">бесплатно</span></td>
+            <td class="cloud"><span class="mark no">подписка</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="table-note">Сравнение по архитектуре, не по конкретному вендору. У части сервисов есть и «безботовый» локальный захват звука - но обработка почти всегда всё равно уходит в облако для расшифровки.</p>
+  </div>
+</section>
+
+<section id="ask">
+  <div class="wrap">
+    <div class="ask-wrap">
+      <div>
+        <div class="eyebrow">спросить</div>
+        <h2 style="font-size:clamp(26px,3.4vw,36px);margin-top:14px;">Задайте вопрос всей истории встреч - не одной записи</h2>
+        <p class="lede" style="margin-top:16px;">«Что мы решили по срокам в июле?» - LoMeet ищет ответ по транскриптам и саммари всех прошлых встреч и указывает, из какой именно записи и с какого момента взят ответ. Клик по источнику - и плеер сразу перематывает к нужной секунде.</p>
+      </div>
+      <div class="chat">
+        <div class="bubble q">Что решили по срокам запуска каталога?</div>
+        <div class="bubble a">
+          Договорились перенести релиз на вторник после демо - блокер был в приёмке карточек товара.
+          <span class="src">Источник: «Демо 12.08», 14:32</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="stack">
+  <div class="wrap">
+    <div class="section-head" style="margin-bottom:0;">
+      <div class="eyebrow">под капотом</div>
+      <h2>Настоящий стек, не обёртка вокруг чужого API</h2>
+      <p>LoMeet не проксирует запросы к внешним LLM-сервисам. Каждый компонент - отдельный локальный процесс, который можно проверить и остановить в любой момент.</p>
+    </div>
+    <div class="stack">
+      <span class="chip"><b>ffmpeg</b> · захват и микширование звука</span>
+      <span class="chip"><b>faster-whisper</b> · распознавание речи</span>
+      <span class="chip"><b>sherpa-onnx</b> · разбор по спикерам</span>
+      <span class="chip"><b>Ollama</b> · саммари и поиск по встречам</span>
+      <span class="chip"><b>Electron</b> · интерфейс меню-бара</span>
+    </div>
+  </div>
+</section>
+
+<section class="closing">
+  <div class="wrap">
+    <div class="eyebrow">итого</div>
+    <div class="closing-row">
+      <h2>Запись встречи - это ваши данные. Пусть они и остаются вашими.</h2>
+      <a class="btn btn-primary" href="#features">Смотреть, что внутри</a>
+    </div>
+  </div>
+</section>
+
+<section id="feedback">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">обратная связь</div>
+      <h2>Нашли баг или есть идея - напишите</h2>
+      <p>Форма ничего не отправляет на сервер сама - она открывает ваш почтовый клиент с уже заполненным письмом. Ни один символ не уходит куда-то ещё.</p>
+    </div>
+    <form class="feedback-form" id="feedbackForm" novalidate>
+      <div class="f-row">
+        <label for="fbName">Имя</label>
+        <input id="fbName" name="name" type="text" maxlength="120" autocomplete="name" placeholder="Как к вам обращаться" required>
+      </div>
+      <div class="f-row">
+        <label for="fbEmail">Email для ответа</label>
+        <input id="fbEmail" name="email" type="email" maxlength="200" autocomplete="email" placeholder="you@example.com" required>
+      </div>
+      <div class="f-row">
+        <label for="fbMessage">Сообщение</label>
+        <textarea id="fbMessage" name="message" rows="5" maxlength="4000" placeholder="Что случилось или что хотелось бы видеть в LoMeet" required></textarea>
+      </div>
+      <div class="f-actions">
+        <button type="submit" class="btn btn-primary">Написать</button>
+        <span class="f-hint">Откроется почтовый клиент - без сервера и без сохранения где-либо ещё.</span>
+      </div>
+      <div class="f-status" id="fbStatus" role="status" aria-live="polite"></div>
+    </form>
+  </div>
+</section>
+
+<footer class="site">
+  <div class="wrap">
+    <div class="brand" style="font-size:15px;"><span class="dot"></span>LoMeet</div>
+    <div class="fine">МЕНЮ-БАР ДЛЯ MACOS · ЗАПИСЬ, РАСШИФРОВКА И САММАРИ ЛОКАЛЬНО</div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+  var form = document.getElementById("feedbackForm");
+  if (!form) return;
+  var status = document.getElementById("fbStatus");
+  var RECIPIENT = "aleksandr.lomako@gmail.com";
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    // Только чтение значений полей - никакого innerHTML и никакой отправки
+    // на сторонний сервер. encodeURIComponent экранирует переводы строк,
+    // "&" и "=", так что вставить лишние mailto-параметры (например cc/bcc)
+    // через поля формы нельзя.
+    var name = (form.name.value || "").trim().slice(0, 120);
+    var email = (form.email.value || "").trim().slice(0, 200);
+    var message = (form.message.value || "").trim().slice(0, 4000);
+
+    if (!message) {
+      status.textContent = "Напишите пару слов в сообщении.";
+      return;
+    }
+
+    var subject = "LoMeet - сообщение с сайта" + (name ? " от " + name : "");
+    var bodyLines = [];
+    if (email) bodyLines.push("Ответить на: " + email);
+    bodyLines.push("");
+    bodyLines.push(message);
+
+    var mailto =
+      "mailto:" + RECIPIENT +
+      "?subject=" + encodeURIComponent(subject) +
+      "&body=" + encodeURIComponent(bodyLines.join("\n"));
+
+    window.location.href = mailto;
+    status.textContent = "Открываю почтовый клиент...";
+  });
+})();
+</script>
+
+</body>
+</html>
