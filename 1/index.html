@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'sha256-SPN6IdgBMJbAdMh/mL7qdQOi18Vm94ss3ZXbnZtu1sU=' https://fonts.googleapis.com; script-src 'sha256-sCtr4JM2GJF3/bhjyte9X2V/9UykXkpTAezVgetT87Q='; connect-src https://formsubmit.co">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="robots" content="noindex">
 <meta name="description" content="LoMeet — локальный рекордер встреч для macOS: запись, расшифровка и саммари прямо на устройстве, без бота в звонке и без облака.">
 <title>LoMeet</title>
@@ -342,6 +344,14 @@
   .f-actions{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:4px;}
   .f-hint{font-size:13px;color:var(--ink-faint);max-width:36ch;}
   .f-status{font-size:13px;color:var(--accent-bright);font-family:"Oswald",sans-serif;letter-spacing:.02em;}
+  .f-status.ok{color:var(--good);}
+  .f-status.err{color:var(--bad);}
+  /* Поле с ошибкой подсвечивается рамкой: одного текста под формой мало,
+     когда полей несколько - непонятно, какое именно править. */
+  .f-row input.f-invalid, .f-row textarea.f-invalid{border-color:var(--bad);}
+  .f-row input.f-invalid:focus, .f-row textarea.f-invalid:focus{
+    border-color:var(--bad);box-shadow:0 0 0 3px rgba(201,138,114,0.22);
+  }
 
   /* ---------- stack strip ---------- */
   .stack{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px;}
@@ -365,10 +375,16 @@
   footer.site .brand{font-size:15px;}
   footer.site .fine{font-family:"Oswald",sans-serif;font-size:12px;letter-spacing:.04em;color:var(--ink-faint);}
 
-  /* Отличия копии на /1/: у статуса появляются состояния «успех/ошибка»,
-     потому что отправка теперь реальная и может не удаться. */
-  .f-status.ok{color:var(--good);}
-  .f-status.err{color:var(--bad);}
+  /* ---------- утилиты ----------
+     Заменяют инлайн-атрибуты style=: с ними пришлось бы разрешать
+     'unsafe-inline' в style-src, то есть снимать защиту со всего документа
+     ради пяти правил. */
+  .u-faint{color:var(--ink-faint);}
+  .u-h2-tight{font-size:clamp(26px,3.4vw,36px);margin-top:14px;}
+  .u-mt-16{margin-top:16px;}
+  .u-mb-0{margin-bottom:0;}
+  .u-brand-sm{font-size:15px;}
+
   /* Ловушка для ботов: человек этого поля не видит и не заполняет. */
   .f-trap{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;}
 </style>
@@ -490,7 +506,7 @@
     </div>
     <div class="preview-grid">
       <div class="mock small" role="img" aria-label="Макет карточки саммари встречи: резюме и список задач по участникам">
-        <div class="mock-title"><span>Саммари встречи</span><span style="color:var(--ink-faint);">31.08, 13:01</span></div>
+        <div class="mock-title"><span>Саммари встречи</span><span class="u-faint">31.08, 13:01</span></div>
         <div class="mock-body">
           <div class="summary-h">Резюме</div>
           <ul class="summary-list">
@@ -578,8 +594,8 @@
     <div class="ask-wrap">
       <div>
         <div class="eyebrow">умный поиск</div>
-        <h2 style="font-size:clamp(26px,3.4vw,36px);margin-top:14px;">Задайте вопрос всей истории встреч - не одной записи</h2>
-        <p class="lede" style="margin-top:16px;">«Что мы решили по срокам в июле?» - LoMeet ищет ответ по транскриптам и саммари всех прошлых встреч и указывает, из какой именно записи и с какого момента взят ответ. Клик по источнику - и плеер сразу перематывает к нужной секунде.</p>
+        <h2 class="u-h2-tight">Задайте вопрос всей истории встреч - не одной записи</h2>
+        <p class="lede u-mt-16">«Что мы решили по срокам в июле?» - LoMeet ищет ответ по транскриптам и саммари всех прошлых встреч и указывает, из какой именно записи и с какого момента взят ответ. Клик по источнику - и плеер сразу перематывает к нужной секунде.</p>
       </div>
       <div class="chat">
         <div class="bubble q">Что решили по срокам запуска каталога?</div>
@@ -594,7 +610,7 @@
 
 <section id="stack">
   <div class="wrap">
-    <div class="section-head" style="margin-bottom:0;">
+    <div class="section-head u-mb-0">
       <div class="eyebrow">под капотом</div>
       <h2>Настоящий стек, не обёртка вокруг чужого API</h2>
       <p>LoMeet не проксирует запросы к внешним LLM-сервисам. Каждый компонент - отдельный локальный процесс, который можно проверить и остановить в любой момент.</p>
@@ -628,11 +644,11 @@
     <form class="feedback-form" id="feedbackForm" novalidate>
       <div class="f-row">
         <label for="fbName">Имя</label>
-        <input id="fbName" name="name" type="text" maxlength="120" autocomplete="name" placeholder="Как к вам обращаться" required>
+        <input id="fbName" name="name" type="text" maxlength="120" autocomplete="name" aria-describedby="fbStatus" placeholder="Как к вам обращаться" required>
       </div>
       <div class="f-row">
         <label for="fbContact">Контакт</label>
-        <input id="fbContact" name="contact" type="text" maxlength="200" autocomplete="email" placeholder="Email или телефон" required>
+        <input id="fbContact" name="contact" type="text" maxlength="200" autocomplete="email" aria-describedby="fbStatus" placeholder="Email или телефон" required>
       </div>
       <div class="f-row">
         <label for="fbMessage">Сообщение</label>
@@ -652,7 +668,7 @@
 
 <footer class="site">
   <div class="wrap">
-    <div class="brand" style="font-size:15px;"><span class="dot"></span>LoMeet</div>
+    <div class="brand u-brand-sm"><span class="dot"></span>LoMeet</div>
     <div class="fine">ПРИЛОЖЕНИЕ ДЛЯ MAC · ЗАПИСЬ, РАСШИФРОВКА И САММАРИ ВСТРЕЧ ПРЯМО НА УСТРОЙСТВЕ</div>
   </div>
 </footer>
@@ -711,10 +727,90 @@
   });
 })();
 
+// Проверка полей вынесена из обработчика формы и живёт отдельно: страница
+// /1/ отправляет заявку другим способом, но правила заполнения у обеих
+// страниц обязаны быть одни и те же, иначе они разъедутся при первой правке.
+window.LoMeetForm = (function () {
+  "use strict";
+
+  var LIMITS = { name: 120, contact: 200, message: 4000 };
+
+  // Управляющие символы не несут смысла ни в имени, ни в контакте, зато
+  // ломают разбор письма на приёмной стороне (в том числе переводом строки
+  // посреди поля). Вычищаются до всякой проверки.
+  function stripControl(value, keepNewlines) {
+    var text = String(value == null ? "" : value).replace(/\r\n?/g, "\n");
+    // В многострочном поле перевод строки осмыслен, в однострочных - нет:
+    // там он служит только тому, чтобы разорвать значение на две строки.
+    return keepNewlines
+      ? text.replace(/[\u0000-\u0009\u000B-\u001F\u007F]/g, " ")
+      : text.replace(/[\u0000-\u001F\u007F]/g, " ");
+  }
+
+  function cleanLine(value, limit) {
+    return stripControl(value, false).replace(/ {2,}/g, " ").trim().slice(0, limit);
+  }
+
+  function cleanText(value, limit) {
+    return stripControl(value, true).replace(/\n{3,}/g, "\n\n").trim().slice(0, limit);
+  }
+
+  // Намеренно нестрогая проверка email: задача - отсечь опечатку и мусор, а
+  // не соответствие RFC. Полная проверка адреса возможна только письмом.
+  var EMAIL = /^[^\s@]{1,64}@[^\s@.]+(?:\.[^\s@.]{2,})+$/;
+
+  function looksLikeEmail(value) {
+    return EMAIL.test(value);
+  }
+
+  // Телефон: только цифры и обычные разделители, длина в пределах E.164
+  // (максимум 15 цифр) и не короче семи - иначе это не номер.
+  function looksLikePhone(value) {
+    if (!/^\+?[\d\s().-]+$/.test(value)) return false;
+    var digits = value.replace(/\D/g, "");
+    return digits.length >= 7 && digits.length <= 15;
+  }
+
+  function read(fields) {
+    return {
+      name: cleanLine(fields.name.value, LIMITS.name),
+      contact: cleanLine(fields.contact.value, LIMITS.contact),
+      message: cleanText(fields.message.value, LIMITS.message)
+    };
+  }
+
+  // Возвращает первую ошибку или null. Первую, а не все сразу: список из
+  // трёх претензий под формой читается хуже, чем одна подсвеченная строка.
+  function validate(data) {
+    if (!data.name) return { field: "name", message: "Укажите имя." };
+    if (data.name.length < 2) return { field: "name", message: "Имя слишком короткое - минимум два символа." };
+    if (!/\p{L}/u.test(data.name)) return { field: "name", message: "В имени должны быть буквы." };
+
+    if (!data.contact) return { field: "contact", message: "Укажите контакт, иначе ответить будет некуда." };
+    if (!looksLikeEmail(data.contact) && !looksLikePhone(data.contact)) {
+      return { field: "contact", message: "Не похоже на email или телефон - проверьте контакт." };
+    }
+    return null;
+  }
+
+  function mark(field, invalid) {
+    if (!field) return;
+    if (invalid) {
+      field.classList.add("f-invalid");
+      field.setAttribute("aria-invalid", "true");
+    } else {
+      field.classList.remove("f-invalid");
+      field.removeAttribute("aria-invalid");
+    }
+  }
+
+  return { read: read, validate: validate, mark: mark, limits: LIMITS };
+})();
+
 (function () {
   "use strict";
   var RECIPIENT = "aleksandr.lomako@gmail.com";
-  // Страница статическая, своего сервера нет — отправку выполняет сервис
+  // Страница статическая, своего сервера нет - отправку выполняет сервис
   // доставки форм. Ключа и аккаунта не требует, адрес получателя прямо в URL.
   var ENDPOINT = "https://formsubmit.co/ajax/" + RECIPIENT;
 
@@ -726,9 +822,10 @@
   var contactField = document.getElementById("fbContact");
   var messageField = document.getElementById("fbMessage");
   var honeyField = document.getElementById("fbHoney");
+  var FIELDS = { name: nameField, contact: contactField, message: messageField };
 
-  // Собираем статус узлами, а не разметкой: в него попадает адрес ссылкой,
-  // а рядом — пользовательский ввод, и склейка в innerHTML стала бы дырой.
+  // Статус собирается узлами, а не разметкой: в него попадает адрес ссылкой,
+  // а рядом - пользовательский ввод, и склейка в innerHTML стала бы дырой.
   function say(kind, parts) {
     status.className = "f-status" + (kind ? " " + kind : "");
     status.textContent = "";
@@ -744,27 +841,29 @@
     return a;
   }
 
-  function readForm() {
-    return {
-      name: (nameField.value || "").trim().slice(0, 120),
-      contact: (contactField.value || "").trim().slice(0, 200),
-      message: (messageField.value || "").trim().slice(0, 4000)
-    };
-  }
+  // Подсветка и текст ошибки снимаются, как только человек начал править
+  // поле: иначе страница показывает ошибку, которой уже нет. Сообщение об
+  // успешной отправке при этом не трогаем - оно остаётся верным.
+  [nameField, contactField].forEach(function (field) {
+    field.addEventListener("input", function () {
+      window.LoMeetForm.mark(field, false);
+      if (status.classList.contains("err")) say("", []);
+    });
+  });
 
   form.addEventListener("submit", function (e) {
     e.preventDefault();
-    var data = readForm();
+    var data = window.LoMeetForm.read(FIELDS);
 
-    // Обязательны имя и контакт: без них ответить будет некому.
-    if (!data.name) {
-      say("err", ["Укажите имя."]);
-      nameField.focus();
-      return;
-    }
-    if (!data.contact) {
-      say("err", ["Укажите контакт, иначе ответить будет некуда."]);
-      contactField.focus();
+    // Правила заполнения общие с главной страницей - см. LoMeetForm.
+    window.LoMeetForm.mark(nameField, false);
+    window.LoMeetForm.mark(contactField, false);
+    var problem = window.LoMeetForm.validate(data);
+    if (problem) {
+      var bad = FIELDS[problem.field];
+      window.LoMeetForm.mark(bad, true);
+      say("err", [problem.message]);
+      bad.focus();
       return;
     }
 
@@ -819,7 +918,7 @@
         say("err", [
           "Отправить не удалось. Попробуйте ещё раз или напишите на ",
           mailLink(),
-          " — заявка не потеряется."
+          " - заявка не потеряется."
         ]);
       })
       .then(function () {
