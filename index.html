@@ -760,11 +760,29 @@
     // encodeURIComponent экранирует переводы строк, "&" и "=", так что
     // вставить лишние mailto-параметры (например cc/bcc) через поля формы
     // нельзя.
-    window.location.href =
+    var mailto =
       "mailto:" + RECIPIENT +
       "?subject=" + encodeURIComponent(SUBJECT) +
       "&body=" + encodeURIComponent(bodyFor(data));
-    status.textContent = DONE_MESSAGE + " Письмо открылось в почтовом приложении - нажмите там «Отправить».";
+
+    // Клик по временной ссылке, а не присваивание location.href: переход на
+    // внешнюю схему из присваивания часть браузеров игнорирует молча, а клик
+    // выполняется внутри того же пользовательского жеста, что и отправка формы.
+    var opener = document.createElement("a");
+    opener.href = mailto;
+    opener.style.display = "none";
+    document.body.appendChild(opener);
+    opener.click();
+    document.body.removeChild(opener);
+
+    // Не утверждаем, что письмо открылось: сработал mailto или нет, страница
+    // узнать не может, а почтовое приложение назначено не у всех - именно на
+    // это и наткнулись при живой проверке. Поэтому текст не обещает результат,
+    // а сразу даёт запасной путь.
+    status.textContent =
+      DONE_MESSAGE +
+      " Если почтовое приложение не открылось - нажмите «Скопировать текст заявки» и пришлите текст на " +
+      RECIPIENT;
   });
 
   // Запасной путь на случай, когда почтовый клиент не настроен и mailto
