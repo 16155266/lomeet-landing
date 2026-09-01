@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Заявка на LoMeet — локальный рекордер встреч для macOS. Оставьте контакт, и я вышлю исходники.">
+<meta name="robots" content="noindex">
+<title>Заявка на LoMeet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600;700&family=Oswald:wght@400;500&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#14120f;
+    --bg-raised:#1c1915;
+    --bg-panel:#211d18;
+    --ink:#f2eee6;
+    --ink-soft:#b8af9f;
+    --ink-faint:#7a7266;
+    --line:#332d25;
+    --line-soft:#241f1a;
+    --accent:#e8a33d;
+    --accent-bright:#ffc466;
+    --accent-ink:#1c1200;
+    --accent-dim:#4a3115;
+    --accent-glow:rgba(232,163,61,0.35);
+    --good:#8fb87f;
+    --good-dim:#1e2a1a;
+    --bad:#c98a72;
+    --bad-dim:#2c1c17;
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    min-height:100vh;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"PT Sans","Segoe UI",sans-serif;
+    font-size:17px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(ellipse 760px 420px at 50% -140px, rgba(232,163,61,0.12), transparent 62%);
+    display:flex;
+    flex-direction:column;
+  }
+  ::selection{background:var(--accent-dim);color:var(--accent-bright);}
+
+  h1{
+    font-family:"Unbounded","PT Sans",sans-serif;
+    font-weight:700;
+    font-size:clamp(28px,4.6vw,40px);
+    line-height:1.15;
+    letter-spacing:-.015em;
+    text-wrap:balance;
+    margin:18px 0 0;
+  }
+  a{color:var(--accent-bright);}
+  a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
+    outline:2px solid var(--accent);outline-offset:3px;border-radius:4px;
+  }
+
+  .wrap{width:100%;max-width:620px;margin:0 auto;padding:0 24px;}
+
+  header.top{border-bottom:1px solid var(--line-soft);}
+  header.top .wrap{display:flex;align-items:center;justify-content:space-between;padding-top:18px;padding-bottom:18px;}
+  .brand{
+    display:flex;align-items:center;gap:10px;
+    font-family:"Unbounded",sans-serif;font-weight:700;font-size:17px;letter-spacing:-.01em;
+    text-decoration:none;color:var(--ink);
+  }
+  .brand .dot{width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px 1px var(--accent-glow);}
+  .back{
+    font-family:"Oswald",sans-serif;font-size:13px;letter-spacing:.05em;text-transform:uppercase;
+    color:var(--ink-soft);text-decoration:none;
+  }
+  .back:hover{color:var(--ink);}
+
+  main{flex:1;padding:56px 0 72px;}
+  @media (max-width:600px){ main{padding:36px 0 56px;} }
+
+  .eyebrow{
+    font-family:"Oswald","PT Sans",sans-serif;font-weight:500;font-size:13px;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--accent);
+    display:flex;align-items:center;gap:10px;
+  }
+  .eyebrow::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px var(--accent-dim);flex:none;}
+  .lede{margin-top:16px;color:var(--ink-soft);}
+
+  form{margin-top:34px;display:flex;flex-direction:column;gap:20px;}
+  .row{display:flex;flex-direction:column;gap:8px;}
+  .row label{
+    font-family:"Oswald",sans-serif;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-soft);
+  }
+  .row label .opt{color:var(--ink-faint);text-transform:none;letter-spacing:0;font-size:12px;}
+  input,textarea{
+    width:100%;
+    background:var(--bg-raised);border:1px solid var(--line);border-radius:8px;
+    padding:12px 14px;color:var(--ink);
+    font-family:"PT Sans",sans-serif;font-size:15px;line-height:1.5;
+    resize:vertical;
+  }
+  input::placeholder,textarea::placeholder{color:var(--ink-faint);}
+  input:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim);}
+  input[aria-invalid="true"],textarea[aria-invalid="true"]{border-color:var(--bad);}
+
+  /* Ловушка для ботов: настоящий человек это поле не видит и не заполняет. */
+  .trap{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;}
+
+  .actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:4px;}
+  .btn{
+    font-family:"Oswald","PT Sans",sans-serif;font-weight:500;font-size:15px;
+    letter-spacing:.03em;text-transform:uppercase;
+    display:inline-flex;align-items:center;gap:9px;
+    padding:14px 26px;border-radius:8px;border:1px solid transparent;cursor:pointer;
+    background:var(--accent);color:var(--accent-ink);
+    box-shadow:0 8px 24px -8px var(--accent-glow);
+    transition:background .15s ease,transform .15s ease,opacity .15s ease;
+  }
+  .btn:hover:not(:disabled){background:var(--accent-bright);transform:translateY(-1px);}
+  .btn:disabled{opacity:.55;cursor:default;box-shadow:none;}
+
+  .note{margin-top:26px;font-size:13.5px;color:var(--ink-faint);}
+
+  .status{
+    display:none;
+    margin-top:22px;padding:16px 18px;border-radius:10px;
+    font-size:15px;line-height:1.55;
+    border:1px solid var(--line);background:var(--bg-raised);
+  }
+  .status.shown{display:block;}
+  .status.ok{border-color:var(--good);background:var(--good-dim);}
+  .status.err{border-color:var(--bad);background:var(--bad-dim);}
+  .status .title{
+    display:block;font-family:"Oswald",sans-serif;font-size:12.5px;letter-spacing:.06em;
+    text-transform:uppercase;margin-bottom:6px;
+  }
+  .status.ok .title{color:var(--good);}
+  .status.err .title{color:var(--bad);}
+  .status code{
+    font-family:"Oswald",monospace;background:var(--bg-panel);border:1px solid var(--line);
+    border-radius:4px;padding:1px 6px;color:var(--accent-bright);font-size:.94em;
+  }
+
+  footer.site{border-top:1px solid var(--line-soft);padding:24px 0;}
+  footer.site .wrap{
+    font-family:"Oswald",sans-serif;font-size:12px;letter-spacing:.04em;color:var(--ink-faint);
+    text-transform:uppercase;
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="../"><span class="dot"></span>LoMeet</a>
+    <a class="back" href="../">На главную</a>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <div class="eyebrow">заявка</div>
+    <h1>Оставьте заявку на LoMeet</h1>
+    <p class="lede">Заполните форму - заявка уйдёт сразу, почтовое приложение открывать не нужно. Я отвечу на указанный контакт и вышлю исходники.</p>
+
+    <form id="applyForm" novalidate>
+      <div class="row">
+        <label for="fName">Имя</label>
+        <input id="fName" name="name" type="text" maxlength="120" autocomplete="name" placeholder="Как к вам обращаться">
+      </div>
+      <div class="row">
+        <label for="fContact">Контакт</label>
+        <input id="fContact" name="contact" type="text" maxlength="200" autocomplete="email" placeholder="Email или телефон">
+      </div>
+      <div class="row">
+        <label for="fMessage">Сообщение <span class="opt">(необязательно)</span></label>
+        <textarea id="fMessage" name="message" rows="5" maxlength="4000" placeholder="Пара слов о том, зачем нужен LoMeet - macOS какой версии, Apple Silicon или Intel"></textarea>
+      </div>
+
+      <div class="trap" aria-hidden="true">
+        <label for="fHoney">Не заполняйте это поле</label>
+        <input id="fHoney" name="_honey" type="text" tabindex="-1" autocomplete="off">
+      </div>
+
+      <div class="actions">
+        <button type="submit" class="btn" id="submitBtn">Отправить заявку</button>
+      </div>
+    </form>
+
+    <div class="status" id="status" role="status" aria-live="polite"></div>
+
+    <p class="note">Доставку заявки выполняет сервис форм formsubmit.co - через него проходят только эти три поля.</p>
+  </div>
+</main>
+
+<footer class="site">
+  <div class="wrap">Приложение для Mac · запись, расшифровка и саммари встреч прямо на устройстве</div>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  var RECIPIENT = "aleksandr.lomako@gmail.com";
+  // AJAX-эндпоинт сервиса доставки форм: страница статическая, своего
+  // сервера у неё нет, поэтому отправку выполняет он. Ключей и аккаунта не
+  // требует — адрес получателя прямо в URL.
+  var ENDPOINT = "https://formsubmit.co/ajax/" + RECIPIENT;
+
+  var form = document.getElementById("applyForm");
+  var btn = document.getElementById("submitBtn");
+  var box = document.getElementById("status");
+  var nameField = document.getElementById("fName");
+  var contactField = document.getElementById("fContact");
+  var messageField = document.getElementById("fMessage");
+  var honeyField = document.getElementById("fHoney");
+
+  function show(kind, title, html) {
+    box.className = "status shown " + kind;
+    box.innerHTML = '<span class="title"></span><span class="body"></span>';
+    box.querySelector(".title").textContent = title;
+    // Тело собираем узлами, а не разметкой из полей формы: в сообщение
+    // попадает пользовательский ввод, и склейка строк в innerHTML стала бы
+    // дырой для внедрения разметки.
+    var body = box.querySelector(".body");
+    html.forEach(function (part) {
+      if (typeof part === "string") body.appendChild(document.createTextNode(part));
+      else body.appendChild(part);
+    });
+  }
+
+  function mailLink() {
+    var a = document.createElement("a");
+    a.href = "mailto:" + RECIPIENT;
+    a.textContent = RECIPIENT;
+    return a;
+  }
+
+  function invalid(field, message) {
+    field.setAttribute("aria-invalid", "true");
+    field.focus();
+    show("err", "Не хватает данных", [message]);
+    return false;
+  }
+
+  function readForm() {
+    return {
+      name: (nameField.value || "").trim().slice(0, 120),
+      contact: (contactField.value || "").trim().slice(0, 200),
+      message: (messageField.value || "").trim().slice(0, 4000)
+    };
+  }
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    nameField.removeAttribute("aria-invalid");
+    contactField.removeAttribute("aria-invalid");
+
+    var data = readForm();
+    if (!data.name) return invalid(nameField, "Укажите имя.");
+    if (!data.contact) return invalid(contactField, "Укажите контакт, иначе ответить будет некуда.");
+
+    // Заполненная ловушка означает бота: делаем вид, что всё прошло, и
+    // ничего никуда не отправляем.
+    if (honeyField.value) {
+      show("ok", "Заявка отправлена", ["Спасибо, я свяжусь с вами."]);
+      form.reset();
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = "Отправляю...";
+    box.className = "status";
+
+    fetch(ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      body: JSON.stringify({
+        _subject: "Заявка с лендинга LoMeet",
+        _template: "table",
+        // Капча несовместима с фоновой отправкой: с ней сервис ждёт
+        // человека на своей странице, а мы её не показываем.
+        _captcha: "false",
+        "Имя": data.name,
+        "Контакт": data.contact,
+        "Сообщение": data.message || "(не заполнено)"
+      })
+    })
+      .then(function (res) {
+        return res.json().catch(function () { return {}; }).then(function (payload) {
+          return { ok: res.ok, payload: payload };
+        });
+      })
+      .then(function (result) {
+        if (!result.ok || String(result.payload.success) !== "true") {
+          throw new Error(result.payload.message || "не удалось отправить");
+        }
+        show("ok", "Заявка отправлена", ["Спасибо, я свяжусь с вами по указанному контакту."]);
+        form.reset();
+      })
+      .catch(function () {
+        // Показываем адрес прямо здесь: иначе при сбое человек остаётся
+        // с потерянной заявкой и без понимания, куда писать.
+        show("err", "Отправить не удалось", [
+          "Попробуйте ещё раз или напишите напрямую на ",
+          mailLink(),
+          " - заявка не потеряется."
+        ]);
+      })
+      .then(function () {
+        btn.disabled = false;
+        btn.textContent = "Отправить заявку";
+      });
+  });
+})();
+</script>
+
+</body>
+</html>
