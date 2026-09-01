@@ -1,0 +1,884 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Security: Content Security Policy (ограничивает источники ресурсов) -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' 'unsafe-inline' https://mc.yandex.ru; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://mc.yandex.ru https://*.yandex.ru; font-src 'self' data:; connect-src 'self' https://mc.yandex.ru https://*.yandex.ru wss://mc.yandex.ru wss://*.yandex.ru https://formsubmit.co; form-action 'self' https://formsubmit.co; frame-src 'none'; object-src 'none'; base-uri 'self'; upgrade-insecure-requests"
+    />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+
+    <title>shoes.by — премиальный домен продается</title>
+    <meta
+      name="description"
+      content="shoes.by — премиальный домен для обувного бизнеса, интернет-магазина или бренда. Короткий, лаконичный и легко запоминающийся."
+    />
+    <meta property="og:title" content="shoes.by — премиальный домен продается" />
+    <meta
+      property="og:description"
+      content="Короткий и запоминающийся домен для обувного бизнеса, интернет-магазина или бренда."
+    />
+    <meta
+      property="og:image"
+      content="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 630'%3E%3Crect width='1200' height='630' fill='%23f5f5f7'/%3E%3Ctext x='50%25' y='46%25' text-anchor='middle' font-size='200' font-family='Arial, sans-serif'%3E👟%3C/text%3E%3Ctext x='50%25' y='72%25' text-anchor='middle' font-size='58' fill='%231d1d1f' font-family='Arial, sans-serif'%3Eshoes.by%3C/text%3E%3C/svg%3E"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23f5f5f7'/%3E%3Ctext x='50%25' y='51%25' text-anchor='middle' font-size='34'%3E👟%3C/text%3E%3C/svg%3E"
+    />
+
+    <!-- Yandex.Metrika counter -->
+    <script type="text/javascript">
+        (function(m,e,t,r,i,k,a){
+            m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+            m[i].l=1*new Date();
+            for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+            k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
+        })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=112081862', 'ym');
+
+        ym(112081862, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});
+    </script>
+    <noscript><div><img src="https://mc.yandex.ru/watch/112081862" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+    <!-- /Yandex.Metrika counter -->
+
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f5f5f7;
+        --bg-2: #ffffff;
+        --text: #1d1d1f;
+        --muted: #5f6368;
+        --line: rgba(29, 29, 31, 0.12);
+        --card: rgba(255, 255, 255, 0.86);
+        --accent: #0071e3;
+        --accent-strong: #005ec6;
+        --success: #1f8f5f;
+        --danger: #b42318;
+        --shadow: 0 18px 45px rgba(0, 0, 0, 0.06);
+        --radius: 24px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.55;
+      }
+
+      a {
+        color: inherit;
+      }
+
+      .wrap {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 22px 16px 64px;
+      }
+
+      .site-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 18px;
+        padding: 6px 0;
+      }
+
+      .brand {
+        font-weight: 700;
+        letter-spacing: -0.03em;
+      }
+
+      .lang-switch {
+        display: inline-flex;
+        gap: 6px;
+        padding: 4px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: var(--bg-2);
+      }
+
+      .lang-btn {
+        border: 0;
+        background: transparent;
+        padding: 8px 12px;
+        border-radius: 999px;
+        color: var(--muted);
+        cursor: pointer;
+        font: inherit;
+      }
+
+      .lang-btn.is-active {
+        background: var(--accent);
+        color: #fff;
+      }
+
+      .hero {
+        padding: 28px 10px 8px;
+      }
+
+      .hero-grid {
+        display: grid;
+        gap: 20px;
+        align-items: start;
+      }
+
+      .eyebrow {
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-size: 0.76rem;
+        font-weight: 700;
+        color: var(--muted);
+        margin: 0 0 12px;
+      }
+
+      h1 {
+        margin: 0 0 12px;
+        font-size: clamp(3rem, 8vw, 5.5rem);
+        line-height: 0.98;
+        letter-spacing: -0.05em;
+      }
+
+      .subtitle {
+        font-size: 1.08rem;
+        color: var(--muted);
+        max-width: 760px;
+        margin: 0 0 20px;
+      }
+
+      .price-box {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin: 0 0 18px;
+        padding: 12px 16px;
+        background: var(--bg-2);
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        box-shadow: var(--shadow);
+      }
+
+      .price {
+        font-size: 1.45rem;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+      }
+
+      .actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 24px;
+      }
+
+      .modal {
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        background: rgba(0, 0, 0, 0.48);
+        z-index: 50;
+      }
+
+      .modal.is-open {
+        display: flex;
+      }
+
+      .modal-card {
+        width: min(100%, 560px);
+        padding: 22px;
+        border-radius: 24px;
+        background: var(--bg-2);
+        border: 1px solid var(--line);
+        box-shadow: var(--shadow);
+      }
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+
+      .modal-close {
+        border: 0;
+        background: transparent;
+        color: var(--muted);
+        font-size: 1.5rem;
+        cursor: pointer;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 48px;
+        padding: 0 18px;
+        border-radius: 999px;
+        border: 1px solid transparent;
+        text-decoration: none;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .btn.primary {
+        background: var(--accent);
+        color: #fff;
+        box-shadow: var(--shadow);
+      }
+
+      .btn.primary:hover,
+      .btn.primary:focus-visible {
+        background: var(--accent-strong);
+      }
+
+      .btn.secondary {
+        background: transparent;
+        border-color: var(--line);
+        color: var(--text);
+      }
+
+      .btn:focus-visible,
+      input:focus-visible,
+      textarea:focus-visible,
+      .lang-btn:focus-visible {
+        outline: 3px solid rgba(0, 113, 227, 0.24);
+        outline-offset: 2px;
+      }
+
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 12px;
+        margin-top: 8px;
+      }
+
+      .stat,
+      .card {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+      }
+
+      .stat {
+        padding: 18px;
+      }
+
+      .value {
+        display: block;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        font-size: 1.35rem;
+      }
+
+      .label {
+        color: var(--muted);
+        font-size: 0.92rem;
+      }
+
+      .stack {
+        display: grid;
+        gap: 16px;
+      }
+
+      .card {
+        padding: 24px;
+      }
+
+      h2 {
+        margin: 0 0 12px;
+        font-size: 1.6rem;
+        letter-spacing: -0.03em;
+      }
+
+      p,
+      li {
+        color: var(--muted);
+      }
+
+      ul {
+        margin: 0;
+        padding-left: 20px;
+      }
+
+      .safe-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 14px;
+        margin-top: 14px;
+      }
+
+      .safe-item {
+        display: grid;
+        gap: 8px;
+        padding: 16px;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: var(--bg-2);
+      }
+
+      .safe-icon {
+        font-size: 1.25rem;
+      }
+
+      .safe-title {
+        font-weight: 700;
+        color: var(--text);
+      }
+
+      .contact-row {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 10px;
+      }
+
+      .contact-row a,
+      .plain-email {
+        color: var(--accent);
+        font-weight: 700;
+        text-decoration: none;
+      }
+
+      .form-card {
+        margin-top: 16px;
+      }
+
+      .form-note {
+        margin: 0 0 14px;
+      }
+
+      .contact-form {
+        display: grid;
+        gap: 14px;
+      }
+
+      .contact-form label {
+        display: grid;
+        gap: 8px;
+        font-weight: 600;
+      }
+
+      .field {
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 14px;
+        border: 1px solid var(--line);
+        background: var(--bg-2);
+        color: var(--text);
+        font: inherit;
+      }
+
+      textarea.field {
+        min-height: 120px;
+        resize: vertical;
+      }
+
+      .honeypot {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+        height: 0;
+        width: 0;
+      }
+
+      .status {
+        min-height: 1.4em;
+        font-weight: 700;
+        margin-top: 6px;
+      }
+
+      .status.success {
+        color: var(--success);
+      }
+
+      .status.error {
+        color: var(--danger);
+      }
+
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+
+      @media (min-width: 780px) {
+        .hero-grid {
+          grid-template-columns: 1.2fr 0.8fr;
+        }
+
+        .card {
+          margin-top: 18px;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .wrap {
+          padding-inline: 12px;
+        }
+
+        .site-header {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        .price-box {
+          align-items: flex-start;
+        }
+
+        .actions {
+          flex-direction: column;
+        }
+
+        .btn {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header class="site-header">
+        <div class="brand">shoes.by</div>
+        <div class="lang-switch" aria-label="Language switcher">
+          <button class="lang-btn is-active" type="button" data-lang="ru">RU</button>
+          <button class="lang-btn" type="button" data-lang="en">EN</button>
+        </div>
+      </header>
+
+      <main>
+        <section class="hero">
+          <div class="hero-grid">
+            <div>
+              <p class="eyebrow" data-i18n="eyebrow">Премиальный домен</p>
+              <h1>shoes.by</h1>
+              <p class="subtitle" data-i18n="subtitle">
+                Короткое, запоминающееся имя для обувного бизнеса, интернет-магазина или бренда.
+                Доменный актив с понятной тематикой и сильной коммерческой узнаваемостью.
+              </p>
+
+              <div class="actions">
+                <button class="btn primary" type="button" data-open-modal data-i18n="ctaBuy">Узнать стоимость</button>
+                <a class="btn secondary" href="https://t.me/Lokalokaaa" target="_blank" rel="noreferrer" data-i18n="ctaQuestion">Задать вопрос</a>
+              </div>
+
+              <div class="stats">
+                <div class="stat">
+                  <span class="value">19 лет</span>
+                  <span class="label" data-i18n="statAge">возраст домена</span>
+                </div>
+                <div class="stat">
+                  <span class="value">shoes</span>
+                  <span class="label" data-i18n="statMeaning">ясная тематика</span>
+                </div>
+                <div class="stat">
+                  <span class="value">.by</span>
+                  <span class="label" data-i18n="statZone">локальный и узнаваемый домен</span>
+                </div>
+              </div>
+            </div>
+
+            <aside class="stack">
+              <section class="card">
+                <h2 data-i18n="whyTitle">Почему подходит</h2>
+                <ul>
+                  <li data-i18n="why1">Имя сразу отражает нишу и помогает понять, о чем проект.</li>
+                  <li data-i18n="why2">Короткая форма подходит для рекламы, запоминания и брендирования.</li>
+                  <li data-i18n="why3">Подходит для обувного магазина, каталога, бренда или цифрового проекта.</li>
+                </ul>
+              </section>
+
+              <section class="card">
+                <h2 data-i18n="usageTitle">Сценарии использования</h2>
+                <ul>
+                  <li data-i18n="usage1">Запуск обувного интернет-магазина с понятным доменным именем.</li>
+                  <li data-i18n="usage2">Создание бренда в нише обуви и fashion-проекта.</li>
+                  <li data-i18n="usage3">Построение каталога, площадки или коммерческого ресурса.</li>
+                </ul>
+              </section>
+            </aside>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2 data-i18n="trustTitle">Безопасная сделка</h2>
+          <p data-i18n="trustText">
+            Безопасная сделка через эскроу/гаранта. Передача домена — после оплаты.
+          </p>
+
+          <div class="safe-grid">
+            <div class="safe-item">
+              <div class="safe-icon">🛡️</div>
+              <div class="safe-title" data-i18n="safe1Title">Эскроу-гарант</div>
+              <div data-i18n="safe1Text">Финансовая гарантия сделки и безопасный порядок оплаты.</div>
+            </div>
+            <div class="safe-item">
+              <div class="safe-icon">🔁</div>
+              <div class="safe-title" data-i18n="safe2Title">Передача через регистратора</div>
+              <div data-i18n="safe2Text">Передача права на домен выполняется официально и поэтапно.</div>
+            </div>
+            <div class="safe-item">
+              <div class="safe-icon">📄</div>
+              <div class="safe-title" data-i18n="safe3Title">Договор купли-продажи</div>
+              <div data-i18n="safe3Text">Оформление сделки по договору с прозрачными условиями.</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card form-card" id="lead-form">
+          <h2 data-i18n="formTitle">Оставить заявку</h2>
+          <p class="form-note" data-i18n="formNote">
+            Домен может быть продан в любой момент. Укажите контакт, и мы вернемся в течение 24 часов.
+          </p>
+
+          <form class="contact-form" id="contactForm" novalidate>
+            <input type="text" class="honeypot" name="website" tabindex="-1" autocomplete="off" />
+              <input type="text" class="honeypot" name="_honey" tabindex="-1" autocomplete="off" />
+
+            <label>
+              <span data-i18n="labelName">Имя</span>
+              <input class="field" type="text" name="name" data-i18n-placeholder="placeholderName" placeholder="Ваше имя" required />
+            </label>
+
+            <label>
+              <span data-i18n="labelContact">Email или Telegram</span>
+              <input class="field" type="text" name="contact" data-i18n-placeholder="placeholderContact" placeholder="you@example.com или @username" required />
+            </label>
+
+            <label>
+              <span data-i18n="labelPhone">Телефон</span>
+              <input class="field" type="tel" name="phone" data-i18n-placeholder="placeholderPhone" placeholder="+7 900 000-00-00" />
+            </label>
+
+            <label>
+              <span data-i18n="labelMessage">Сообщение</span>
+              <textarea class="field" name="message" rows="5" data-i18n-placeholder="placeholderMessage" placeholder="Напишите ваш запрос" required></textarea>
+            </label>
+
+            <button class="btn primary" type="submit" data-i18n="submit">Отправить заявку</button>
+            <div class="status" id="formStatus" aria-live="polite"></div>
+          </form>
+        </section>
+
+        <div class="modal" id="leadModal" aria-hidden="true">
+          <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+            <div class="modal-header">
+              <h2 id="modalTitle" data-i18n="formTitle">Оставить заявку</h2>
+              <button class="modal-close" type="button" aria-label="Close">×</button>
+            </div>
+            <p class="form-note" data-i18n="formNote">
+              Домен может быть продан в любой момент. Укажите контакт, и мы вернемся в течение 24 часов.
+            </p>
+            <form class="contact-form" id="modalForm" novalidate>
+              <input type="text" class="honeypot" name="website" tabindex="-1" autocomplete="off" />
+              <input type="text" class="honeypot" name="_honey" tabindex="-1" autocomplete="off" />
+
+              <label>
+                <span data-i18n="labelName">Имя</span>
+                <input class="field" type="text" name="name" data-i18n-placeholder="placeholderName" placeholder="Ваше имя" required />
+              </label>
+
+              <label>
+                <span data-i18n="labelContact">Email или Telegram</span>
+                <input class="field" type="text" name="contact" data-i18n-placeholder="placeholderContact" placeholder="you@example.com или @username" required />
+              </label>
+
+              <label>
+                <span data-i18n="labelPhone">Телефон</span>
+                <input class="field" type="tel" name="phone" data-i18n-placeholder="placeholderPhone" placeholder="+7 900 000-00-00" />
+              </label>
+
+              <label>
+                <span data-i18n="labelMessage">Сообщение</span>
+                <textarea class="field" name="message" rows="5" data-i18n-placeholder="placeholderMessage" placeholder="Напишите ваш запрос" required></textarea>
+              </label>
+
+              <button class="btn primary" type="submit" data-i18n="submit">Отправить заявку</button>
+              <div class="status" id="modalStatus" aria-live="polite"></div>
+            </form>
+          </div>
+        </div>
+
+        <section class="card">
+          <h2 data-i18n="contactsTitle">Контакты</h2>
+          <div class="contact-row">
+            <span data-i18n="telegramLabel">Telegram:</span>
+            <a href="https://t.me/Lokalokaaa" target="_blank" rel="noreferrer">@Lokalokaaa</a>
+          </div>
+          <div class="contact-row">
+            <span data-i18n="emailLabel">Email:</span>
+            <span class="plain-email">aleksandr.lomako@gmail.com</span>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      const FORM_ENDPOINT = 'https://formsubmit.co/ajax/aleksandr.lomako@gmail.com';
+      // заменить на свой endpoint формы, если используете другой сервис
+
+      const translations = {
+        ru: {
+          eyebrow: 'Премиальный домен',
+          subtitle: 'Короткое, запоминающееся имя для обувного бизнеса, интернет-магазина или бренда. Доменный актив с понятной тематикой и сильной коммерческой узнаваемостью.',
+          price: '$9 500',
+          ctaBuy: 'Узнать стоимость',
+          ctaQuestion: 'Задать вопрос',
+          statAge: 'возраст домена',
+          statMeaning: 'ясная тематика',
+          statZone: 'локальный и узнаваемый домен',
+          whyTitle: 'Почему подходит',
+          why1: 'Имя сразу отражает нишу и помогает понять, о чем проект.',
+          why2: 'Короткая форма подходит для рекламы, запоминания и брендирования.',
+          why3: 'Подходит для обувного магазина, каталога, бренда или цифрового проекта.',
+          usageTitle: 'Сценарии использования',
+          usage1: 'Запуск обувного интернет-магазина с понятным доменным именем.',
+          usage2: 'Создание бренда в нише обуви и fashion-проекта.',
+          usage3: 'Построение каталога, площадки или коммерческого ресурса.',
+          trustTitle: 'Безопасная сделка',
+          trustText: 'Безопасная сделка через эскроу/гаранта. Передача домена — после оплаты.',
+          safe1Title: 'Эскроу-гарант',
+          safe1Text: 'Финансовая гарантия сделки и безопасный порядок оплаты.',
+          safe2Title: 'Передача через регистратора',
+          safe2Text: 'Передача права на домен выполняется официально и поэтапно.',
+          safe3Title: 'Договор купли-продажи',
+          safe3Text: 'Оформление сделки по договору с прозрачными условиями.',
+          formTitle: 'Оставить заявку',
+          formNote: 'Домен может быть продан в любой момент. Укажите контакт, и мы вернемся в течение 24 часов.',
+          labelName: 'Имя',
+          labelContact: 'Email или Telegram',
+          labelPhone: 'Телефон',
+          labelMessage: 'Сообщение',
+          placeholderName: 'Ваше имя',
+          placeholderContact: 'you@example.com или @username',
+          placeholderPhone: '+7 900 000-00-00',
+          placeholderMessage: 'Напишите ваш запрос',
+          submit: 'Отправить заявку',
+          contactsTitle: 'Контакты',
+          telegramLabel: 'Telegram:',
+          emailLabel: 'Email:',
+          spamRejected: 'Заявка отклонена как спам.',
+          fillRequired: 'Пожалуйста, заполните все обязательные поля.',
+          sending: 'Отправка...',
+          submitSuccess: 'Заявка отправлена, ответим в течение 24 часов. Или свяжитесь с нами в Telegram: @Lokalokaaa',
+          submitError: 'Не удалось отправить заявку. Проверьте endpoint формы в конфиге и повторите попытку.',
+          title: 'shoes.by — премиальный домен продается',
+          description: 'shoes.by — премиальный домен для обувного бизнеса, интернет-магазина или бренда. Короткий, лаконичный и легко запоминающийся.',
+          ogTitle: 'shoes.by — премиальный домен продается',
+          ogDescription: 'Короткий и запоминающийся домен для обувного бизнеса, интернет-магазина или бренда.'
+        },
+        en: {
+          eyebrow: 'Premium domain',
+          subtitle: 'A short, memorable name for a footwear business, online store, or brand. A domain asset with a clear niche and strong commercial recognition.',
+          price: '$9 500',
+          ctaBuy: 'Request price',
+          ctaQuestion: 'Ask a question',
+          statAge: 'domain age',
+          statMeaning: 'clear niche',
+          statZone: 'local and recognizable domain',
+          whyTitle: 'Why it fits',
+          why1: 'The name immediately reflects the niche and helps people understand the project.',
+          why2: 'Its short form works well for marketing, memorability, and branding.',
+          why3: 'Suitable for a footwear store, catalogue, brand, or digital project.',
+          usageTitle: 'Use cases',
+          usage1: 'Launch an online footwear store with a clear domain name.',
+          usage2: 'Build a brand in the footwear and fashion niche.',
+          usage3: 'Create a catalogue, marketplace, or commercial resource.',
+          trustTitle: 'Safe transaction',
+          trustText: 'A secure transaction through escrow/guarantor. Domain transfer happens after payment.',
+          safe1Title: 'Escrow guarantor',
+          safe1Text: 'A financial guarantee for the transaction and a safe payment process.',
+          safe2Title: 'Transfer via registrar',
+          safe2Text: 'The domain rights are transferred officially and in stages.',
+          safe3Title: 'Sales agreement',
+          safe3Text: 'The deal is documented with a clear and transparent agreement.',
+          formTitle: 'Send a request',
+          formNote: 'The domain can be sold at any time. Leave your contact details and we will reply within 24 hours.',
+          labelName: 'Name',
+          labelContact: 'Email or Telegram',
+          labelPhone: 'Phone',
+          labelMessage: 'Message',
+          placeholderName: 'Your name',
+          placeholderContact: 'you@example.com or @username',
+          placeholderPhone: '+7 900 000-00-00',
+          placeholderMessage: 'Write your request',
+          submit: 'Send request',
+          contactsTitle: 'Contacts',
+          telegramLabel: 'Telegram:',
+          emailLabel: 'Email:',
+          spamRejected: 'Submission rejected as spam.',
+          fillRequired: 'Please fill in all required fields.',
+          sending: 'Sending...',
+          submitSuccess: 'Request sent, we will reply within 24 hours. Or contact us on Telegram: @Lokalokaaa',
+          submitError: 'Could not send the request. Check the form endpoint in the config and try again.',
+          title: 'shoes.by — premium domain for sale',
+          description: 'shoes.by — a premium domain for a footwear business, online store, or brand. Short, concise, and easy to remember.',
+          ogTitle: 'shoes.by — premium domain for sale',
+          ogDescription: 'A short and memorable domain for a footwear business, online store, or brand.'
+        }
+      };
+
+      const form = document.getElementById('contactForm');
+      const modalForm = document.getElementById('modalForm');
+      const formStatus = document.getElementById('formStatus');
+      const modalStatus = document.getElementById('modalStatus');
+      const modal = document.getElementById('leadModal');
+      const modalClose = document.querySelector('.modal-close');
+      const openModalButtons = document.querySelectorAll('[data-open-modal]');
+      const langButtons = document.querySelectorAll('.lang-btn');
+      const i18nNodes = document.querySelectorAll('[data-i18n]');
+      const i18nPlaceholders = document.querySelectorAll('[data-i18n-placeholder]');
+      const titleNode = document.querySelector('title');
+      const metaDescription = document.querySelector('meta[name="description"]');
+      const ogTitle = document.querySelector('meta[property="og:title"]');
+      const ogDescription = document.querySelector('meta[property="og:description"]');
+
+      let currentLang = 'ru';
+
+      function setLanguage(lang) {
+        const t = translations[lang] || translations.ru;
+        currentLang = translations[lang] ? lang : 'ru';
+        document.documentElement.lang = lang;
+        i18nNodes.forEach((node) => {
+          const key = node.dataset.i18n;
+          if (t[key]) node.textContent = t[key];
+        });
+        i18nPlaceholders.forEach((node) => {
+          const key = node.dataset.i18nPlaceholder;
+          if (t[key]) node.placeholder = t[key];
+        });
+        titleNode.textContent = t.title;
+        metaDescription.setAttribute('content', t.description);
+        ogTitle.setAttribute('content', t.ogTitle);
+        ogDescription.setAttribute('content', t.ogDescription);
+        langButtons.forEach((btn) => {
+          const active = btn.dataset.lang === lang;
+          btn.classList.toggle('is-active', active);
+          btn.setAttribute('aria-pressed', String(active));
+        });
+      }
+
+      function openModal() {
+        modalStatus.textContent = '';
+        modalStatus.className = 'status';
+        modal.classList.add('is-open');
+        modal.setAttribute('aria-hidden', 'false');
+      }
+
+      function closeModal() {
+        modal.classList.remove('is-open');
+        modal.setAttribute('aria-hidden', 'true');
+      }
+
+      openModalButtons.forEach((button) => {
+        button.addEventListener('click', openModal);
+      });
+
+      modalClose.addEventListener('click', closeModal);
+      modal.addEventListener('click', (event) => {
+        if (event.target === modal) closeModal();
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && modal.classList.contains('is-open')) {
+          closeModal();
+        }
+      });
+
+      langButtons.forEach((btn) => {
+        btn.addEventListener('click', () => setLanguage(btn.dataset.lang));
+      });
+
+      async function submitForm(formElement, statusElement) {
+        const t = translations[currentLang] || translations.ru;
+        statusElement.className = 'status';
+
+        const formData = new FormData(formElement);
+        const honeypot = formData.get('website');
+        if (honeypot) {
+          statusElement.textContent = t.spamRejected;
+          return;
+        }
+
+        const name = String(formData.get('name') || '').trim();
+        const contact = String(formData.get('contact') || '').trim();
+        const message = String(formData.get('message') || '').trim();
+
+        if (!name || !contact || !message) {
+          statusElement.classList.add('error');
+          statusElement.textContent = t.fillRequired;
+          return;
+        }
+
+        formElement.querySelector('button[type="submit"]').disabled = true;
+        statusElement.textContent = t.sending;
+
+        try {
+          const response = await fetch(FORM_ENDPOINT, {
+            method: 'POST',
+            body: formData,
+            headers: {
+              Accept: 'application/json'
+            }
+          });
+
+          const result = await response.json().catch(() => null);
+
+          if (!response.ok || !result || result.success === 'false' || result.success === false) {
+            throw new Error('Request failed');
+          }
+
+          formElement.reset();
+          statusElement.classList.add('success');
+          statusElement.textContent = t.submitSuccess;
+          // для модальной формы: показать подтверждение и закрыть окно с задержкой,
+          // иначе сообщение исчезнет вместе с закрытой модалкой
+          if (formElement === modalForm) {
+            setTimeout(closeModal, 4000);
+          }
+        } catch (error) {
+          statusElement.classList.add('error');
+          statusElement.textContent = t.submitError;
+        } finally {
+          formElement.querySelector('button[type="submit"]').disabled = false;
+        }
+      }
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        await submitForm(form, formStatus);
+      });
+
+      modalForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        await submitForm(modalForm, modalStatus);
+      });
+
+      setLanguage('ru');
+    </script>
+  </body>
+</html>
