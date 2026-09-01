@@ -85,7 +85,10 @@
   .wrap{max-width:1080px;margin:0 auto;padding:0 28px;}
   .prose{max-width:62ch;}
 
-  section{padding:96px 0;border-top:1px solid var(--line-soft);}
+  /* Липкая шапка перекрывает верх секции, если проматывать к якорю без
+     запаса — на узком экране (padding 64px) заголовок оказывался почти
+     вплотную под ней. */
+  section{padding:96px 0;border-top:1px solid var(--line-soft);scroll-margin-top:24px;}
   section:first-of-type{border-top:none;}
   @media (max-width:720px){ section{padding:64px 0;} }
 
@@ -643,6 +646,57 @@
 </footer>
 
 <script>
+(function () {
+  "use strict";
+  var root = document.documentElement;
+
+  function jumpTo(el) {
+    // Мгновенно, без анимации: позиция должна быть детерминированной,
+    // а не результатом гонки анимации с перевёрсткой.
+    var prev = root.style.scrollBehavior;
+    root.style.scrollBehavior = "auto";
+    el.scrollIntoView();
+    root.style.scrollBehavior = prev;
+  }
+
+  function targetFromHash() {
+    if (location.hash.length < 2) return null;
+    try {
+      return document.getElementById(decodeURIComponent(location.hash.slice(1)));
+    } catch (e) {
+      return null; // битый percent-encoding в адресе — не повод ронять страницу
+    }
+  }
+
+  // Переход по якорю при ОТКРЫТИИ страницы здесь ненадёжен: из-за
+  // scroll-behavior:smooth браузер начинает анимированный скролл, а под ним
+  // в этот момент ещё едет вёрстка от догружающихся шрифтов Google Fonts —
+  // и они конкурируют. Замер 2026-09-01: открытие .../#stack оставляло
+  // страницу на scrollY 0, скролла не происходило вообще. Ждём шрифты,
+  // затем прыгаем без анимации.
+  var initial = targetFromHash();
+  if (initial) {
+    var settled = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
+    settled.then(function () {
+      jumpTo(initial);
+    });
+  }
+
+  // Клик по меню и кнопкам проматывает, но НЕ пишет якорь в адресную строку.
+  // Иначе скопированная оттуда ссылка открывается с середины страницы, а не
+  // с начала — ровно та жалоба, из-за которой это и правится.
+  var links = document.querySelectorAll('a[href^="#"]');
+  Array.prototype.forEach.call(links, function (link) {
+    link.addEventListener("click", function (e) {
+      var id = link.getAttribute("href").slice(1);
+      var el = id ? document.getElementById(id) : null;
+      if (!el) return;
+      e.preventDefault();
+      el.scrollIntoView({ behavior: "smooth" });
+    });
+  });
+})();
+
 (function () {
   "use strict";
   var form = document.getElementById("feedbackForm");
