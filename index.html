@@ -623,15 +623,16 @@
         <input id="fbName" name="name" type="text" maxlength="120" autocomplete="name" placeholder="Как к вам обращаться" required>
       </div>
       <div class="f-row">
-        <label for="fbEmail">Email для ответа</label>
-        <input id="fbEmail" name="email" type="email" maxlength="200" autocomplete="email" placeholder="you@example.com" required>
+        <label for="fbContact">Контакт</label>
+        <input id="fbContact" name="contact" type="text" maxlength="200" autocomplete="email" placeholder="Email или телефон" required>
       </div>
       <div class="f-row">
         <label for="fbMessage">Сообщение</label>
-        <textarea id="fbMessage" name="message" rows="5" maxlength="4000" placeholder="Пара слов о том, зачем нужен LoMeet - macOS какой версии, Apple Silicon или Intel" required></textarea>
+        <textarea id="fbMessage" name="message" rows="5" maxlength="4000" placeholder="Пара слов о том, зачем нужен LoMeet - macOS какой версии, Apple Silicon или Intel"></textarea>
       </div>
       <div class="f-actions">
-        <button type="submit" class="btn btn-primary">Написать</button>
+        <button type="submit" class="btn btn-primary">Отправить</button>
+        <button type="button" class="btn btn-ghost" id="fbCopy">Скопировать текст заявки</button>
       </div>
       <div class="f-status" id="fbStatus" role="status" aria-live="polite"></div>
     </form>
@@ -704,36 +705,117 @@
   var form = document.getElementById("feedbackForm");
   if (!form) return;
   var status = document.getElementById("fbStatus");
+  var copyBtn = document.getElementById("fbCopy");
+  // Обращаемся к полям по id, а не через form.name / form.contact: у формы
+  // есть собственные одноимённые свойства, и такое обращение читается
+  // двусмысленно, даже когда работает.
+  var nameField = document.getElementById("fbName");
+  var contactField = document.getElementById("fbContact");
+  var messageField = document.getElementById("fbMessage");
   var RECIPIENT = "aleksandr.lomako@gmail.com";
+
+  // Только чтение значений полей - никакого innerHTML и никакой отправки
+  // на сторонний сервер.
+  function readForm() {
+    return {
+      name: (nameField.value || "").trim().slice(0, 120),
+      contact: (contactField.value || "").trim().slice(0, 200),
+      message: (messageField.value || "").trim().slice(0, 4000)
+    };
+  }
+
+  var SUBJECT = "Заявка с лендинга";
+  var DONE_MESSAGE = "Спасибо, заявка готова к отправке.";
+
+  function bodyFor(data) {
+    var lines = ["Имя: " + data.name, "Контакт: " + data.contact];
+    if (data.message) {
+      lines.push("");
+      lines.push(data.message);
+    }
+    return lines.join("\n");
+  }
+
+  // Обязательны имя и контакт: без них ответить будет некому. Сообщение
+  // необязательно - «хочу попробовать» это уже достаточная заявка.
+  function requireFields(data) {
+    if (!data.name) {
+      status.textContent = "Укажите имя.";
+      nameField.focus();
+      return false;
+    }
+    if (!data.contact) {
+      status.textContent = "Укажите контакт, иначе ответить будет некуда.";
+      contactField.focus();
+      return false;
+    }
+    return true;
+  }
 
   form.addEventListener("submit", function (e) {
     e.preventDefault();
-    // Только чтение значений полей - никакого innerHTML и никакой отправки
-    // на сторонний сервер. encodeURIComponent экранирует переводы строк,
-    // "&" и "=", так что вставить лишние mailto-параметры (например cc/bcc)
-    // через поля формы нельзя.
-    var name = (form.name.value || "").trim().slice(0, 120);
-    var email = (form.email.value || "").trim().slice(0, 200);
-    var message = (form.message.value || "").trim().slice(0, 4000);
+    var data = readForm();
+    if (!requireFields(data)) return;
 
-    if (!message) {
-      status.textContent = "Напишите пару слов в сообщении.";
-      return;
-    }
-
-    var subject = "LoMeet - заявка на исходники" + (name ? " от " + name : "");
-    var bodyLines = [];
-    if (email) bodyLines.push("Ответить на: " + email);
-    bodyLines.push("");
-    bodyLines.push(message);
-
-    var mailto =
+    // encodeURIComponent экранирует переводы строк, "&" и "=", так что
+    // вставить лишние mailto-параметры (например cc/bcc) через поля формы
+    // нельзя.
+    window.location.href =
       "mailto:" + RECIPIENT +
-      "?subject=" + encodeURIComponent(subject) +
-      "&body=" + encodeURIComponent(bodyLines.join("\n"));
+      "?subject=" + encodeURIComponent(SUBJECT) +
+      "&body=" + encodeURIComponent(bodyFor(data));
+    status.textContent = DONE_MESSAGE + " Письмо открылось в почтовом приложении - нажмите там «Отправить».";
+  });
 
-    window.location.href = mailto;
-    status.textContent = "Открываю почтовый клиент...";
+  // Запасной путь на случай, когда почтовый клиент не настроен и mailto
+  // просто ничего не открывает: текст заявки уходит в буфер обмена вместе
+  // с адресом, куда его отправить.
+  function legacyCopy(text) {
+    try {
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "fixed";
+      ta.style.top = "-1000px";
+      document.body.appendChild(ta);
+      ta.select();
+      var ok = document.execCommand("copy");
+      document.body.removeChild(ta);
+      return ok;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  copyBtn.addEventListener("click", function () {
+    var data = readForm();
+    if (!requireFields(data)) return;
+
+    // Адрес и тема входят в скопированный текст: иначе человек получает
+    // заявку в буфере обмена, но без понимания, куда её слать.
+    var text = "Кому: " + RECIPIENT + "\nТема: " + SUBJECT + "\n\n" + bodyFor(data);
+    var copied = function () {
+      status.textContent = DONE_MESSAGE + " Текст скопирован - отправьте его на " + RECIPIENT;
+    };
+    var notCopied = function () {
+      // Адрес показываем прямо в статусе: иначе при неудаче человек остаётся
+      // и без буфера обмена, и без понимания, куда писать.
+      status.textContent = "Скопировать не удалось. Адрес для заявки: " + RECIPIENT;
+    };
+
+    // Clipboard API работает не везде (нужен защищённый контекст, и его
+    // может запрещать политика встраивающей страницы) - отсюда откат на
+    // execCommand, а не одна голая ветка.
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(copied, function () {
+        if (legacyCopy(text)) copied();
+        else notCopied();
+      });
+    } else if (legacyCopy(text)) {
+      copied();
+    } else {
+      notCopied();
+    }
   });
 })();
 </script>
