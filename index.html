@@ -682,18 +682,22 @@
     });
   }
 
-  // Клик по меню и кнопкам проматывает, но НЕ пишет якорь в адресную строку.
-  // Иначе скопированная оттуда ссылка открывается с середины страницы, а не
-  // с начала — ровно та жалоба, из-за которой это и правится.
-  var links = document.querySelectorAll('a[href^="#"]');
-  Array.prototype.forEach.call(links, function (link) {
-    link.addEventListener("click", function (e) {
-      var id = link.getAttribute("href").slice(1);
-      var el = id ? document.getElementById(id) : null;
-      if (!el) return;
-      e.preventDefault();
-      el.scrollIntoView({ behavior: "smooth" });
-    });
+  // Клик по меню и кнопкам: саму прокрутку делает браузер штатно, мы её НЕ
+  // перехватываем — родной переход по якорю надёжнее любого ручного
+  // scrollIntoView и не может сломаться. Убираем только сам якорь из адреса,
+  // уже после перехода: иначе скопированная из адресной строки ссылка
+  // открывается с середины страницы, а не с начала — ровно та жалоба, из-за
+  // которой это и правится. replaceState меняет только URL и на идущую
+  // прокрутку не влияет. Побочно чинится и то, что повторный клик по тому же
+  // пункту меню раньше не срабатывал (адрес уже содержал этот якорь).
+  document.addEventListener("click", function (e) {
+    var link = e.target && e.target.closest ? e.target.closest('a[href^="#"]') : null;
+    if (!link || e.defaultPrevented) return;
+    setTimeout(function () {
+      if (location.hash) {
+        history.replaceState(null, "", location.pathname + location.search);
+      }
+    }, 120);
   });
 })();
 
