@@ -650,35 +650,33 @@
   "use strict";
   var root = document.documentElement;
 
-  function jumpTo(el) {
-    // Мгновенно, без анимации: позиция должна быть детерминированной,
-    // а не результатом гонки анимации с перевёрсткой.
+  function goToTop() {
+    // Мгновенно, без анимации: позиция должна быть детерминированной, а не
+    // результатом гонки анимации с перевёрсткой.
     var prev = root.style.scrollBehavior;
     root.style.scrollBehavior = "auto";
-    el.scrollIntoView();
+    window.scrollTo(0, 0);
+    // Подстраховка: встречаются окружения, где window.scrollTo игнорируется,
+    // а прокрутка самим элементом отрабатывает.
+    if (window.scrollY !== 0 && document.body.firstElementChild) {
+      document.body.firstElementChild.scrollIntoView();
+    }
     root.style.scrollBehavior = prev;
   }
 
-  function targetFromHash() {
-    if (location.hash.length < 2) return null;
-    try {
-      return document.getElementById(decodeURIComponent(location.hash.slice(1)));
-    } catch (e) {
-      return null; // битый percent-encoding в адресе — не повод ронять страницу
-    }
-  }
-
-  // Переход по якорю при ОТКРЫТИИ страницы здесь ненадёжен: из-за
-  // scroll-behavior:smooth браузер начинает анимированный скролл, а под ним
-  // в этот момент ещё едет вёрстка от догружающихся шрифтов Google Fonts —
-  // и они конкурируют. Замер 2026-09-01: открытие .../#stack оставляло
-  // страницу на scrollY 0, скролла не происходило вообще. Ждём шрифты,
-  // затем прыгаем без анимации.
-  var initial = targetFromHash();
-  if (initial) {
+  // Страница всегда открывается С НАЧАЛА, даже если в ссылке остался якорь.
+  // Ссылка вида .../#stack — это то, что попадало в адресную строку после
+  // клика по меню; открытая потом в новой вкладке, она показывала середину
+  // страницы вместо начала. Одностраничный лендинг читают сверху, ссылки на
+  // отдельную секцию тут ценности не несут, поэтому якорь при открытии
+  // снимается вместе с прокруткой наверх. Ждём шрифты: их загрузка сдвигает
+  // вёрстку уже ПОСЛЕ того, как браузер отработал переход по якорю, и без
+  // ожидания страница могла снова уехать вниз.
+  if (location.hash.length > 1) {
     var settled = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
     settled.then(function () {
-      jumpTo(initial);
+      goToTop();
+      history.replaceState(null, "", location.pathname + location.search);
     });
   }
 
