@@ -1,0 +1,1168 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'sha256-0iPXgOUUJP0PlkgjJbEMBNw5wp3Hwu62GJiPw/4z/uc=' https://fonts.googleapis.com; script-src 'sha256-RCIUS0h3BbtEPJ85sP4xYn5rQHySrkZggVMUE8BA450=' 'sha256-Ysti+tuS4HipG/qWNXn2gdP825xiXK/hPvlUxEtURpw=' 'sha256-EhgLUH6hwO8TvXruI6ujHnMHKSSqezi8pwOLQ19xzns=' 'sha256-QHhBK9dmVN3xM8njaHKjy6T/q3Bqdd5NrnTs26ZCESI='; connect-src https://formsubmit.co">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="robots" content="noindex">
+<meta name="description" content="LoMeet — локальный рекордер встреч для macOS: запись, расшифровка и саммари прямо на устройстве, без бота в звонке и без облака.">
+<title>LoMeet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600;700;800&family=Oswald:wght@400;500;600&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#14120f;
+    --bg-raised:#1c1915;
+    --bg-panel:#211d18;
+    --ink:#f2eee6;
+    --ink-soft:#b8af9f;
+    --ink-faint:#7a7266;
+    --line:#332d25;
+    --line-soft:#241f1a;
+    --accent:#e8a33d;
+    --accent-bright:#ffc466;
+    --accent-ink:#1c1200;
+    --accent-dim:#4a3115;
+    --accent-glow:rgba(232,163,61,0.35);
+    --good:#8fb87f;
+    --bad:#c98a72;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"PT Sans","Segoe UI",sans-serif;
+    font-size:17px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(ellipse 900px 480px at 50% -120px, rgba(232,163,61,0.10), transparent 60%);
+  }
+  ::selection{background:var(--accent-dim);color:var(--accent-bright);}
+
+  h1,h2,h3{
+    font-family:"Unbounded","PT Sans",sans-serif;
+    line-height:1.14;
+    text-wrap:balance;
+    margin:0;
+    color:var(--ink);
+    font-weight:700;
+  }
+  .eyebrow{
+    font-family:"Oswald","PT Sans",sans-serif;
+    font-weight:500;
+    font-size:13px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--accent);
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:8px;height:8px;
+    border-radius:50%;
+    background:var(--accent);
+    box-shadow:0 0 0 3px var(--accent-dim);
+    flex:none;
+  }
+  a{color:var(--accent-bright);}
+  a:focus-visible, button:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:3px;}
+  code{
+    font-family:"Oswald",monospace;
+    background:var(--bg-panel);
+    border:1px solid var(--line);
+    padding:1px 7px;
+    border-radius:4px;
+    font-size:0.88em;
+    color:var(--accent-bright);
+    letter-spacing:.01em;
+  }
+
+  .wrap{max-width:1080px;margin:0 auto;padding:0 28px;}
+  .prose{max-width:62ch;}
+
+  /* Липкая шапка перекрывает верх секции, если проматывать к якорю без
+     запаса — на узком экране (padding 64px) заголовок оказывался почти
+     вплотную под ней. */
+  section{padding:96px 0;border-top:1px solid var(--line-soft);scroll-margin-top:24px;}
+  section:first-of-type{border-top:none;}
+  @media (max-width:720px){ section{padding:64px 0;} }
+
+  .btn{
+    font-family:"Oswald","PT Sans",sans-serif;
+    font-weight:500;
+    font-size:15px;
+    letter-spacing:.03em;
+    text-transform:uppercase;
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    gap:9px;
+    padding:14px 24px;
+    border-radius:8px;
+    border:1px solid transparent;
+    cursor:pointer;
+    transition:transform .15s ease, box-shadow .15s ease, background .15s ease;
+  }
+  .btn:hover{transform:translateY(-1px);}
+  .btn-primary{background:var(--accent);color:var(--accent-ink);box-shadow:0 8px 24px -8px var(--accent-glow);}
+  .btn-primary:hover{background:var(--accent-bright);box-shadow:0 10px 28px -6px var(--accent-glow);}
+  .btn-ghost{background:transparent;color:var(--ink);border-color:var(--line);}
+  .btn-ghost:hover{border-color:var(--ink-soft);}
+
+  /* ---------- top bar ---------- */
+  .topbar{
+    position:sticky;top:0;z-index:20;
+    background:rgba(20,18,15,0.82);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line-soft);
+  }
+  .topbar .wrap{
+    display:flex;align-items:center;justify-content:space-between;
+    padding-top:16px;padding-bottom:16px;
+  }
+  .brand{
+    display:flex;align-items:center;gap:10px;
+    font-family:"Unbounded",sans-serif;font-weight:700;font-size:18px;
+    letter-spacing:-.01em;
+  }
+  .brand .dot{
+    width:11px;height:11px;border-radius:50%;
+    background:var(--accent);
+    box-shadow:0 0 12px 1px var(--accent-glow);
+    animation:pulse 2.4s ease-in-out infinite;
+  }
+  .navlinks{display:flex;gap:28px;font-family:"Oswald",sans-serif;font-size:13.5px;letter-spacing:.05em;text-transform:uppercase;}
+  .navlinks a{color:var(--ink-soft);text-decoration:none;}
+  .navlinks a:hover{color:var(--ink);}
+  @media (max-width:640px){ .navlinks{display:none;} }
+
+  @keyframes pulse{
+    0%,100%{opacity:1;} 50%{opacity:.35;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .brand .dot{animation:none;}
+  }
+
+  /* ---------- hero ---------- */
+  .hero{padding-top:76px;}
+  .hero-grid{
+    display:grid;
+    grid-template-columns:1.05fr 0.95fr;
+    gap:56px;
+    align-items:center;
+  }
+  @media (max-width:920px){ .hero-grid{grid-template-columns:1fr;} }
+
+  .hero h1{
+    font-size:clamp(34px,5.2vw,58px);
+    margin-top:18px;
+    letter-spacing:-.015em;
+  }
+  .hero h1 .accent-word{color:var(--accent);}
+  .hero .lede{
+    margin-top:22px;
+    font-size:18.5px;
+    color:var(--ink-soft);
+    max-width:46ch;
+  }
+  .hero-ctas{display:flex;gap:14px;margin-top:34px;flex-wrap:wrap;}
+  .hero-meta{
+    margin-top:26px;
+    font-family:"Oswald",sans-serif;
+    font-size:13px;
+    letter-spacing:.03em;
+    color:var(--ink-faint);
+    display:flex;gap:8px;flex-wrap:wrap;align-items:center;
+  }
+
+  /* ---------- mock menu-bar panel ---------- */
+  .mock{
+    background:linear-gradient(180deg, var(--bg-panel), var(--bg-raised));
+    border:1px solid var(--line);
+    border-radius:16px;
+    box-shadow:0 40px 80px -30px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.03);
+    overflow:hidden;
+  }
+  .mock-title{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 18px;
+    border-bottom:1px solid var(--line-soft);
+    font-family:"Oswald",sans-serif;font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);
+  }
+  .mock-title .rec{
+    display:flex;align-items:center;gap:7px;
+    color:var(--accent-bright);
+  }
+  .rec-dot{width:7px;height:7px;border-radius:50%;background:var(--accent-bright);animation:pulse 1.4s ease-in-out infinite;}
+  @media (prefers-reduced-motion: reduce){ .rec-dot{animation:none;} }
+
+  .mock-tabs{
+    display:flex;gap:4px;
+    padding:10px 14px 0;
+    font-family:"Oswald",sans-serif;font-size:12.5px;letter-spacing:.04em;text-transform:uppercase;
+  }
+  .mock-tabs span{
+    padding:8px 12px;
+    color:var(--ink-faint);
+    border-bottom:2px solid transparent;
+  }
+  .mock-tabs span.active{color:var(--ink);border-bottom-color:var(--accent);}
+
+  .mock-body{padding:20px 20px 24px;}
+  .meter-row{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+  .meter-row:last-of-type{margin-bottom:22px;}
+  .meter-label{
+    width:118px;flex:none;
+    font-family:"Oswald",sans-serif;font-size:12px;letter-spacing:.03em;color:var(--ink-soft);
+  }
+  .meter-track{
+    flex:1;height:8px;border-radius:5px;
+    background:var(--line-soft);
+    overflow:hidden;
+    display:flex;align-items:center;
+  }
+  .meter-fill{
+    height:100%;border-radius:5px;
+    background:linear-gradient(90deg, var(--accent-dim), var(--accent) 70%, var(--accent-bright));
+    animation:meter1 2.6s ease-in-out infinite;
+    transform-origin:left;
+  }
+  .meter-fill.b{animation-name:meter2;animation-duration:3.1s;}
+  @keyframes meter1{
+    0%,100%{width:22%;} 30%{width:68%;} 55%{width:38%;} 78%{width:82%;}
+  }
+  @keyframes meter2{
+    0%,100%{width:14%;} 25%{width:44%;} 60%{width:30%;} 85%{width:58%;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .meter-fill, .meter-fill.b{animation:none;width:46%;}
+  }
+
+  .mock-cta{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 16px;
+    background:var(--bg-raised);
+    border:1px solid var(--line);
+    border-radius:10px;
+  }
+  .mock-cta .timer{font-family:"Oswald",sans-serif;font-size:15px;color:var(--ink);letter-spacing:.03em;}
+  .mock-stop{
+    font-family:"Oswald",sans-serif;font-size:12px;text-transform:uppercase;letter-spacing:.05em;
+    background:var(--accent-dim);color:var(--accent-bright);
+    border:1px solid var(--accent);
+    padding:8px 14px;border-radius:7px;
+  }
+  .mock-foot{
+    padding:11px 20px;
+    border-top:1px solid var(--line-soft);
+    font-family:"Oswald",sans-serif;font-size:11px;letter-spacing:.03em;color:var(--ink-faint);
+    display:flex;justify-content:space-between;
+  }
+
+  /* ---------- section headers ---------- */
+  .section-head{max-width:56ch;margin-bottom:52px;}
+  .section-head h2{font-size:clamp(26px,3.4vw,36px);margin-top:14px;}
+  .section-head p{margin-top:14px;color:var(--ink-soft);font-size:17px;}
+
+  /* ---------- feature grid ---------- */
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden;}
+  @media (max-width:860px){ .grid{grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:600px){ .grid{grid-template-columns:1fr;} }
+  .card{background:var(--bg-raised);padding:28px 26px;}
+  .card .num{font-family:"Oswald",sans-serif;font-size:12px;letter-spacing:.08em;color:var(--accent);}
+  .card h3{font-family:"PT Sans",sans-serif;font-weight:700;font-size:18px;margin-top:12px;}
+  .card p{margin-top:10px;color:var(--ink-soft);font-size:15px;line-height:1.55;}
+
+  /* ---------- comparison table ---------- */
+  .table-shell{border:1px solid var(--line);border-radius:14px;overflow:auto;background:var(--bg-raised);}
+  table{border-collapse:collapse;width:100%;min-width:620px;font-size:15.5px;}
+  thead th{
+    font-family:"Oswald",sans-serif;font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;
+    text-align:left;padding:18px 20px;color:var(--ink-faint);border-bottom:1px solid var(--line);
+  }
+  thead th.col-lomeet{color:var(--accent-bright);}
+  tbody td, tbody th{padding:16px 20px;border-bottom:1px solid var(--line-soft);text-align:left;font-weight:400;}
+  tbody tr:last-child td, tbody tr:last-child th{border-bottom:none;}
+  tbody th{font-family:"PT Sans",sans-serif;font-weight:700;color:var(--ink);white-space:nowrap;}
+  td.lomeet{color:var(--ink);font-weight:700;background:var(--accent-dim);}
+  td.cloud{color:var(--ink-soft);}
+  .mark{display:inline-flex;align-items:center;gap:8px;}
+  .mark::before{font-family:"Oswald",sans-serif;font-weight:600;}
+  .mark.yes::before{content:"✓";color:var(--good);}
+  .mark.no::before{content:"✕";color:var(--bad);}
+  .table-note{margin-top:16px;font-size:13.5px;color:var(--ink-faint);max-width:64ch;}
+
+  /* ---------- ask spotlight ---------- */
+  .ask-wrap{display:grid;grid-template-columns:1fr 1fr;gap:52px;align-items:center;}
+  @media (max-width:860px){ .ask-wrap{grid-template-columns:1fr;} }
+  .chat{
+    background:var(--bg-raised);border:1px solid var(--line);border-radius:14px;
+    padding:20px;display:flex;flex-direction:column;gap:14px;
+  }
+  .bubble{padding:13px 16px;border-radius:11px;font-size:15px;line-height:1.5;max-width:88%;}
+  .bubble.q{background:var(--bg-panel);align-self:flex-end;color:var(--ink);border:1px solid var(--line);}
+  .bubble.a{background:var(--accent-dim);color:var(--ink);border:1px solid var(--accent-dim);}
+  .bubble.a .src{
+    display:block;margin-top:10px;font-family:"Oswald",sans-serif;font-size:11.5px;letter-spacing:.03em;
+    color:var(--accent-bright);text-transform:uppercase;
+  }
+
+  /* ---------- preview mockups ---------- */
+  .preview-grid{display:grid;grid-template-columns:1fr 1fr;gap:28px;}
+  @media (max-width:780px){ .preview-grid{grid-template-columns:1fr;} }
+  .mock.small .mock-body{padding:22px 20px;}
+  .summary-h{font-family:"Oswald",sans-serif;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;}
+  .summary-h.second{margin-top:20px;}
+  .summary-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:9px;}
+  .summary-list li{font-size:14.5px;color:var(--ink-soft);padding-left:16px;position:relative;line-height:1.45;}
+  .summary-list li::before{content:"";position:absolute;left:0;top:9px;width:6px;height:1px;background:var(--ink-faint);}
+  .summary-list li b{color:var(--ink);}
+  .settings-row{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:12px 0;border-bottom:1px solid var(--line-soft);font-size:14px;}
+  .settings-row:last-child{border-bottom:none;}
+  .settings-row .settings-key{color:var(--ink-faint);font-family:"Oswald",sans-serif;font-size:12px;letter-spacing:.03em;text-transform:uppercase;flex:none;}
+  .settings-row .settings-val{color:var(--ink);font-family:"PT Sans",sans-serif;text-align:right;}
+
+  /* ---------- feedback form ---------- */
+  .feedback-form{display:flex;flex-direction:column;gap:20px;max-width:620px;}
+  .f-row{display:flex;flex-direction:column;gap:8px;}
+  .f-row label{font-family:"Oswald",sans-serif;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-soft);}
+  .f-row input, .f-row textarea{
+    background:var(--bg-raised);border:1px solid var(--line);border-radius:8px;
+    padding:12px 14px;color:var(--ink);font-family:"PT Sans",sans-serif;font-size:15px;
+    resize:vertical;
+  }
+  .f-row input::placeholder, .f-row textarea::placeholder{color:var(--ink-faint);}
+  .f-row input:focus, .f-row textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim);}
+  .f-actions{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:4px;}
+  .f-hint{font-size:13px;color:var(--ink-faint);max-width:36ch;}
+  .f-status{font-size:13px;color:var(--accent-bright);font-family:"Oswald",sans-serif;letter-spacing:.02em;}
+  .f-status.ok{color:var(--good);}
+  .f-status.err{color:var(--bad);}
+  /* Поле с ошибкой подсвечивается рамкой: одного текста под формой мало,
+     когда полей несколько - непонятно, какое именно править. */
+  .f-row input.f-invalid, .f-row textarea.f-invalid{border-color:var(--bad);}
+  .f-row input.f-invalid:focus, .f-row textarea.f-invalid:focus{
+    border-color:var(--bad);box-shadow:0 0 0 3px rgba(201,138,114,0.22);
+  }
+
+  /* ---------- stack strip ---------- */
+  .stack{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px;}
+  .chip{
+    font-family:"Oswald",sans-serif;font-size:13px;letter-spacing:.03em;
+    border:1px solid var(--line);border-radius:100px;padding:9px 16px;color:var(--ink-soft);
+    background:var(--bg-raised);
+  }
+  .chip b{color:var(--ink);font-weight:600;}
+
+  /* ---------- closing ---------- */
+  .closing{text-align:left;}
+  .closing h2{font-size:clamp(28px,4vw,42px);max-width:16ch;}
+  .closing-row{display:flex;justify-content:space-between;align-items:flex-end;gap:32px;flex-wrap:wrap;margin-top:30px;}
+
+  footer.site{
+    border-top:1px solid var(--line-soft);
+    padding:36px 0;
+  }
+  footer.site .wrap{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
+  footer.site .brand{font-size:15px;}
+  footer.site .fine{font-family:"Oswald",sans-serif;font-size:12px;letter-spacing:.04em;color:var(--ink-faint);}
+
+  /* ---------- утилиты ----------
+     Заменяют инлайн-атрибуты style=: с ними пришлось бы разрешать
+     'unsafe-inline' в style-src, то есть снимать защиту со всего документа
+     ради пяти правил. */
+  .u-faint{color:var(--ink-faint);}
+  .u-h2-tight{font-size:clamp(26px,3.4vw,36px);margin-top:14px;}
+  .u-mt-16{margin-top:16px;}
+  .u-mb-0{margin-bottom:0;}
+  .u-brand-sm{font-size:15px;}
+
+  /* ---------- v4: активная ссылка в навигации при прокрутке ---------- */
+  .navlinks a.is-active{color:var(--accent-bright);}
+
+  /* ---------- v4: строка фактов под hero ---------- */
+  .fact-strip{
+    display:flex;flex-wrap:wrap;gap:0;
+    margin-top:40px;
+    border-top:1px solid var(--line-soft);
+    border-bottom:1px solid var(--line-soft);
+  }
+  .fact{
+    flex:1 1 160px;
+    padding:18px 22px 18px 0;
+    border-right:1px solid var(--line-soft);
+  }
+  .fact:last-child{border-right:none;}
+  .fact b{
+    display:block;font-family:"Unbounded",sans-serif;font-size:26px;font-weight:700;color:var(--ink);
+  }
+  .fact span{
+    display:block;margin-top:4px;font-family:"Oswald",sans-serif;font-size:12.5px;letter-spacing:.03em;color:var(--ink-faint);
+  }
+  @media (max-width:720px){
+    .fact{flex:1 1 45%;padding:16px 16px 16px 0;}
+  }
+
+  /* ---------- v4: три стадии «до / во время / после» ---------- */
+  .stages{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line-soft);border:1px solid var(--line-soft);border-radius:16px;overflow:hidden;margin-top:44px;}
+  @media (max-width:820px){ .stages{grid-template-columns:1fr;} }
+  .stage{background:var(--bg-panel);padding:32px 28px;}
+  .stage-num{
+    font-family:"Oswald",sans-serif;font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--accent);display:flex;align-items:center;gap:8px;
+  }
+  .stage-num::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent);flex:none;}
+  .stage h3{margin-top:14px;font-size:19px;}
+  .stage p{margin-top:10px;color:var(--ink-soft);font-size:15px;line-height:1.55;}
+  .stage .tag{
+    display:inline-block;margin-top:16px;
+    font-family:"Oswald",sans-serif;font-size:11.5px;letter-spacing:.03em;text-transform:uppercase;
+    color:var(--ink-faint);border:1px solid var(--line);border-radius:100px;padding:5px 12px;
+  }
+
+  /* ---------- v4: табы «для кого» ---------- */
+  .usecase-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-top:32px;}
+  .usecase-tab{
+    font-family:"Oswald",sans-serif;font-size:13px;letter-spacing:.03em;
+    background:transparent;border:1px solid var(--line);border-radius:100px;
+    padding:9px 18px;color:var(--ink-soft);cursor:pointer;
+  }
+  .usecase-tab.is-active{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);}
+  .usecase-panel{
+    margin-top:24px;background:var(--bg-panel);border:1px solid var(--line);border-radius:14px;
+    padding:28px 30px;
+  }
+  .usecase-panel[hidden]{display:none;}
+  .usecase-panel p{color:var(--ink-soft);font-size:16px;line-height:1.6;max-width:64ch;}
+  .usecase-panel .usecase-note{
+    margin-top:14px;font-family:"Oswald",sans-serif;font-size:12px;letter-spacing:.03em;color:var(--ink-faint);
+  }
+
+  /* ---------- v4: FAQ-аккордеон ---------- */
+  .faq-list{margin-top:32px;border-top:1px solid var(--line-soft);}
+  .faq-item{border-bottom:1px solid var(--line-soft);}
+  .faq-q{
+    width:100%;text-align:left;background:transparent;border:none;cursor:pointer;
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+    padding:20px 2px;font-family:"Unbounded",sans-serif;font-size:16.5px;color:var(--ink);
+  }
+  .faq-q:hover{color:var(--accent-bright);}
+  .faq-q .plus{
+    flex:none;width:22px;height:22px;position:relative;
+  }
+  .faq-q .plus::before, .faq-q .plus::after{
+    content:"";position:absolute;background:var(--ink-faint);border-radius:2px;
+  }
+  .faq-q .plus::before{left:0;top:9px;width:22px;height:2px;}
+  .faq-q .plus::after{left:9px;top:0;width:2px;height:22px;transition:transform .15s ease;}
+  .faq-item.is-open .faq-q .plus::after{transform:rotate(90deg);}
+  .faq-item.is-open .faq-q{color:var(--accent-bright);}
+  .faq-a{
+    max-height:0;overflow:hidden;transition:max-height .2s ease;
+  }
+  .faq-item.is-open .faq-a{max-height:400px;}
+  .faq-a p{padding:0 2px 20px;color:var(--ink-soft);font-size:15px;line-height:1.6;max-width:64ch;}
+
+  /* ---------- v4: липкая CTA-панель снизу ---------- */
+  .sticky-cta{
+    position:fixed;left:0;right:0;bottom:0;z-index:30;
+    display:flex;align-items:center;justify-content:center;gap:18px;flex-wrap:wrap;
+    padding:14px 20px;
+    background:rgba(20,18,15,0.92);backdrop-filter:blur(10px);
+    border-top:1px solid var(--line-soft);
+    transform:translateY(100%);transition:transform .25s ease;
+  }
+  .sticky-cta.is-visible{transform:translateY(0);}
+  .sticky-cta span{font-family:"Oswald",sans-serif;font-size:13.5px;color:var(--ink-soft);}
+  @media (max-width:560px){ .sticky-cta span{display:none;} }
+
+  /* На узких экранах нижняя панель не должна закрывать форму заявки. */
+  #feedback{scroll-margin-bottom:80px;}
+</style>
+</head>
+<body>
+
+
+<div class="topbar">
+  <div class="wrap">
+    <div class="brand"><span class="dot"></span>LoMeet</div>
+    <nav class="navlinks" id="navlinks">
+      <a href="#stages" data-nav="stages">Как это работает</a>
+      <a href="#compare" data-nav="compare">Сравнение</a>
+      <a href="#usecases" data-nav="usecases">Для кого</a>
+      <a href="#faq" data-nav="faq">Вопросы</a>
+      <a href="#feedback" data-nav="feedback">Написать</a>
+    </nav>
+  </div>
+</div>
+
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-grid">
+      <div>
+        <div class="eyebrow">меню-бар · macOS</div>
+        <h1>Встреча.<br>Ваш Mac.<br><span class="accent-word">Больше никто.</span></h1>
+        <p class="lede">LoMeet записывает звонок, расшифровывает и собирает саммари прямо на вашем компьютере. Без бота в списке участников, без загрузки на сервер, без аккаунта.</p>
+        <div class="hero-ctas">
+          <a class="btn btn-primary" href="#feedback">Оставить заявку на бету</a>
+          <a class="btn btn-ghost" href="#stages">Как это устроено</a>
+        </div>
+
+        <div class="fact-strip">
+          <div class="fact"><b>0</b><span>серверов, куда уходит звук</span></div>
+          <div class="fact"><b>0 ₽</b><span>подписки - платить некому</span></div>
+          <div class="fact"><b>5</b><span>локальных процессов вместо облака</span></div>
+        </div>
+      </div>
+
+      <div class="mock" role="img" aria-label="Стилизованный макет выпадающей панели LoMeet в меню-баре: индикатор записи, таймер, уровни микрофона и звука встречи, кнопка остановки">
+        <div class="mock-title">
+          <span>LoMeet</span>
+          <span class="rec"><span class="rec-dot"></span>ЗАПИСЬ</span>
+        </div>
+        <div class="mock-tabs">
+          <span class="active">Запись</span>
+          <span>Умный поиск</span>
+          <span>Настройки</span>
+        </div>
+        <div class="mock-body">
+          <div class="meter-row">
+            <span class="meter-label">Микрофон</span>
+            <span class="meter-track"><span class="meter-fill"></span></span>
+          </div>
+          <div class="meter-row">
+            <span class="meter-label">Звук встречи</span>
+            <span class="meter-track"><span class="meter-fill b"></span></span>
+          </div>
+          <div class="mock-cta">
+            <span class="timer">24:18</span>
+            <span class="mock-stop">Остановить</span>
+          </div>
+        </div>
+        <div class="mock-foot">
+          <span>v0.12.0</span>
+          <span>3 встречи сегодня</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="stages">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">как это работает</div>
+      <h2>Три момента, три разных инструмента - все на одном Mac</h2>
+      <p>Ничего не откладывается «на потом в облаке». Каждый этап делает своя локальная модель, сразу на месте.</p>
+    </div>
+
+    <div class="stages">
+      <div class="stage">
+        <div class="stage-num">Пока вы говорите</div>
+        <h3>Запись без участника «LoMeet»</h3>
+        <p>Звук пишется прямо с устройства через ffmpeg - мимо API площадки видеосвязи. В списке участников звонка LoMeet не появляется, потому что технически в него не заходит.</p>
+        <span class="tag">ffmpeg · avfoundation</span>
+      </div>
+      <div class="stage">
+        <div class="stage-num">Сразу после</div>
+        <h3>Расшифровка, спикеры, саммари</h3>
+        <p>faster-whisper распознаёт речь, sherpa-onnx размечает, кто говорит, Ollama собирает саммари - всё на этом же Mac, пока файл лежит на диске и никуда не отправлен.</p>
+        <span class="tag">faster-whisper · sherpa-onnx · Ollama</span>
+      </div>
+      <div class="stage">
+        <div class="stage-num">Через месяц</div>
+        <h3>Один вопрос - весь архив встреч</h3>
+        <p>«Что решили по срокам в июле?» - умный поиск находит ответ по всей истории транскриптов и саммари, а не только по одной записи, и указывает, из какой встречи он взят.</p>
+        <span class="tag">эмбеддинги · умный поиск</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="preview">
+  <div class="wrap">
+    <div class="ask-wrap">
+      <div>
+        <div class="eyebrow">умный поиск</div>
+        <h2 class="u-h2-tight">Клик по источнику - и плеер сам находит момент в записи</h2>
+        <p class="lede u-mt-16">Ответ приходит не «из воздуха»: под ним видно, из какой встречи и с какой секунды он взят. Один клик - и плеер перематывает ровно туда.</p>
+      </div>
+      <div class="chat">
+        <div class="bubble q">Что решили по срокам запуска каталога?</div>
+        <div class="bubble a">
+          Договорились перенести релиз на вторник после демо - блокер был в приёмке карточек товара.
+          <span class="src">Источник: «Демо 12.08», 14:32</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="compare">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">сравнение</div>
+      <h2>Разница - не в списке функций, а в том, куда уходит звук</h2>
+      <p>Большинство сервисов записи встреч устроены одинаково: бот-участник заходит в звонок, а обработка - расшифровка, саммари - происходит на серверах вендора. LoMeet устроен иначе на уровне архитектуры.</p>
+    </div>
+
+    <div class="table-shell">
+      <table>
+        <thead>
+          <tr>
+            <th>Что происходит</th>
+            <th class="col-lomeet">LoMeet</th>
+            <th>Типичный облачный бот</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th>Кто виден в списке участников</th>
+            <td class="lomeet"><span class="mark yes">никто</span></td>
+            <td class="cloud"><span class="mark no">бот-участник</span></td>
+          </tr>
+          <tr>
+            <th>Куда уходит звук</th>
+            <td class="lomeet"><span class="mark yes">остаётся на устройстве</span></td>
+            <td class="cloud"><span class="mark no">на сервер вендора</span></td>
+          </tr>
+          <tr>
+            <th>Где расшифровка и саммари</th>
+            <td class="lomeet"><span class="mark yes">локально, на Mac</span></td>
+            <td class="cloud"><span class="mark no">в облаке</span></td>
+          </tr>
+          <tr>
+            <th>Нужен аккаунт</th>
+            <td class="lomeet"><span class="mark yes">нет</span></td>
+            <td class="cloud"><span class="mark no">да</span></td>
+          </tr>
+          <tr>
+            <th>Работает офлайн</th>
+            <td class="lomeet"><span class="mark yes">да, после установки моделей</span></td>
+            <td class="cloud"><span class="mark no">нет</span></td>
+          </tr>
+          <tr>
+            <th>Стоимость</th>
+            <td class="lomeet"><span class="mark yes">бесплатно</span></td>
+            <td class="cloud"><span class="mark no">подписка</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="table-note">Сравнение по архитектуре, не по конкретному вендору. У части сервисов есть и «безботовый» локальный захват звука - но обработка почти всегда всё равно уходит в облако для расшифровки.</p>
+  </div>
+</section>
+
+<section id="usecases">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">для кого</div>
+      <h2>Кому в первую очередь пригодится локальная запись</h2>
+      <p>Ниже - типичные сценарии, а не отзывы реальных пользователей: LoMeet ещё в закрытой бете.</p>
+    </div>
+
+    <div class="usecase-tabs" role="tablist" id="usecaseTabs">
+      <button class="usecase-tab is-active" role="tab" aria-selected="true" aria-controls="usecase-pm" id="tab-pm">Проектный менеджер</button>
+      <button class="usecase-tab" role="tab" aria-selected="false" aria-controls="usecase-freelance" id="tab-freelance">Фрилансер-консультант</button>
+      <button class="usecase-tab" role="tab" aria-selected="false" aria-controls="usecase-dev" id="tab-dev">Разработчик</button>
+      <button class="usecase-tab" role="tab" aria-selected="false" aria-controls="usecase-interview" id="tab-interview">Соискатель на собеседовании</button>
+    </div>
+
+    <div class="usecase-panel" id="usecase-pm" role="tabpanel" aria-labelledby="tab-pm">
+      <p>Демо с заказчиком, синки с командой, встречи со стейкхолдерами - за день их несколько, и держать в голове, кто что пообещал, тяжело. Саммари и умный поиск по всей истории встреч закрывают именно это: не нужно пересматривать запись, чтобы вспомнить, на чём сошлись по срокам.</p>
+      <div class="usecase-note">Заказчик слышит только вас - бот в список участников не заходит.</div>
+    </div>
+    <div class="usecase-panel" id="usecase-freelance" role="tabpanel" aria-labelledby="tab-freelance" hidden>
+      <p>Созвоны с разными клиентами часто идут в разных сервисах видеосвязи - Zoom, Meet, Teams, иногда просто звонок в мессенджере. LoMeet пишет звук с устройства, а не через API конкретной площадки, поэтому ему не важно, где именно идёт разговор.</p>
+      <div class="usecase-note">Расшифровка и саммари не зависят от того, даёт ли платформа встречи доступ к записи.</div>
+    </div>
+    <div class="usecase-panel" id="usecase-dev" role="tabpanel" aria-labelledby="tab-dev" hidden>
+      <p>Разбор архитектуры, ревью решений, обсуждение бага с коллегой - такие встречи полезно перечитать текстом, а не искать нужный момент на слух. Каждый компонент конвейера - отдельный локальный процесс, который видно в Activity Monitor и который можно остановить в любой момент.</p>
+      <div class="usecase-note">Транскрипт и аудио не покидают диск - ни на одном этапе обработки.</div>
+    </div>
+    <div class="usecase-panel" id="usecase-interview" role="tabpanel" aria-labelledby="tab-interview" hidden>
+      <p>Записывать разговор с потенциальным работодателем через облачный сервис означает отправить его на сервер третьей стороны. LoMeet держит запись только на вашем диске - решать, кому её показывать, целиком остаётся за вами.</p>
+      <div class="usecase-note">Ничего не синхронизируется в фоне и не требует аккаунта, привязанного к рабочей почте.</div>
+    </div>
+  </div>
+</section>
+
+<section id="stack">
+  <div class="wrap">
+    <div class="section-head u-mb-0">
+      <div class="eyebrow">под капотом</div>
+      <h2>Настоящий стек, не обёртка вокруг чужого API</h2>
+      <p>LoMeet не проксирует запросы к внешним LLM-сервисам. Каждый компонент - отдельный локальный процесс, который можно проверить и остановить в любой момент.</p>
+    </div>
+    <div class="stack">
+      <span class="chip"><b>ffmpeg</b> · захват и микширование звука</span>
+      <span class="chip"><b>faster-whisper</b> · распознавание речи</span>
+      <span class="chip"><b>sherpa-onnx</b> · разбор по спикерам</span>
+      <span class="chip"><b>Ollama</b> · саммари и поиск по встречам</span>
+      <span class="chip"><b>Electron</b> · интерфейс меню-бара</span>
+    </div>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="wrap">
+    <div class="section-head u-mb-0">
+      <div class="eyebrow">вопросы</div>
+      <h2>Что обычно спрашивают до установки</h2>
+    </div>
+
+    <div class="faq-list" id="faqList">
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">Работает не на macOS?<span class="plus" aria-hidden="true"></span></button>
+        <div class="faq-a"><p>Сейчас - только macOS, это основная и единственно проверенная вживую версия. Порт под Windows есть в коде (тот же захват экрана и звука, расшифровка, саммари), но ни разу не запускался на реальной Windows-машине - объявим отдельно, когда это будет честно проверено, а не просто написано.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">Нужен аккаунт или подписка?<span class="plus" aria-hidden="true"></span></button>
+        <div class="faq-a"><p>Нет. Регистрации нет, потому что нечему отправлять данные - сервера, который бы их принимал, у LoMeet просто не существует. По той же причине нет и подписки: обработка идёт на вашей вычислительной мощности, а не на арендованной у вендора.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">Куда физически попадает запись?<span class="plus" aria-hidden="true"></span></button>
+        <div class="faq-a"><p>В локальную папку на вашем диске - аудио, видео (если включено), транскрипт и саммари лежат обычными файлами. Ничего не синхронизируется в облако автоматически.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">Что нужно поставить, кроме самого приложения?<span class="plus" aria-hidden="true"></span></button>
+        <div class="faq-a"><p>ffmpeg - для захвата и склейки звука/видео, Ollama - для саммари и умного поиска, и виртуальное аудиоустройство (BlackHole) - чтобы писать звук встречи, а не только микрофон. Список честный: без них часть функций работать не будет.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">Как получить доступ сейчас?<span class="plus" aria-hidden="true"></span></button>
+        <div class="faq-a"><p>LoMeet в закрытой бете. Форма ниже - это заявка на подключение, а не на рассылку новостей: ответ придёт на указанный контакт.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">Что будет, если удалить или остановить приложение?<span class="plus" aria-hidden="true"></span></button>
+        <div class="faq-a"><p>Уже сделанные записи и файлы остаются в локальной папке - они не привязаны к работающему процессу приложения и никуда не пропадают вместе с ним.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="closing">
+  <div class="wrap">
+    <div class="eyebrow">итого</div>
+    <div class="closing-row">
+      <h2>Запись встречи - это ваши данные. Пусть они и остаются вашими.</h2>
+      <a class="btn btn-primary" href="#feedback">Оставить заявку на бету</a>
+    </div>
+  </div>
+</section>
+
+<section id="feedback">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">заявка</div>
+      <h2>Хотите установить себе? Оставьте заявку - и присоединяйтесь к закрытому бета-тестированию</h2>
+    </div>
+
+    <form class="feedback-form" id="feedbackForm" novalidate>
+      <div class="f-row">
+        <label for="fbName">Имя</label>
+        <input id="fbName" name="name" type="text" maxlength="120" autocomplete="name" aria-describedby="fbStatus" placeholder="Как к вам обращаться" required>
+      </div>
+      <div class="f-row">
+        <label for="fbContact">Контакт</label>
+        <input id="fbContact" name="contact" type="text" maxlength="200" autocomplete="email" aria-describedby="fbStatus" placeholder="Email или телефон" required>
+      </div>
+      <div class="f-row">
+        <label for="fbMessage">Сообщение</label>
+        <textarea id="fbMessage" name="message" rows="5" maxlength="4000" placeholder="Пара слов о том, зачем нужен LoMeet - macOS какой версии, Apple Silicon или Intel"></textarea>
+      </div>
+      <div class="f-trap" aria-hidden="true">
+        <label for="fbHoney">Не заполняйте это поле</label>
+        <input id="fbHoney" name="_honey" type="text" tabindex="-1" autocomplete="off">
+      </div>
+      <div class="f-actions">
+        <button type="submit" class="btn btn-primary" id="fbSubmit">Отправить заявку</button>
+      </div>
+      <div class="f-status" id="fbStatus" role="status" aria-live="polite"></div>
+    </form>
+  </div>
+</section>
+
+<footer class="site">
+  <div class="wrap">
+    <div class="brand u-brand-sm"><span class="dot"></span>LoMeet</div>
+    <div class="fine">ПРИЛОЖЕНИЕ ДЛЯ MAC · ЗАПИСЬ, РАСШИФРОВКА И САММАРИ ВСТРЕЧ ПРЯМО НА УСТРОЙСТВЕ</div>
+  </div>
+</footer>
+
+<div class="sticky-cta" id="stickyCta">
+  <span>Готовы попробовать локальную запись?</span>
+  <a class="btn btn-primary" href="#feedback" id="stickyCtaLink">Оставить заявку</a>
+</div>
+
+<script>
+window.LoMeetForm = (function () {
+  "use strict";
+
+  var LIMITS = { name: 120, contact: 200, message: 4000 };
+
+  // Управляющие символы не несут смысла ни в имени, ни в контакте, зато
+  // ломают разбор письма на приёмной стороне (в том числе переводом строки
+  // посреди поля). Вычищаются до всякой проверки.
+  function stripControl(value, keepNewlines) {
+    var text = String(value == null ? "" : value).replace(/\r\n?/g, "\n");
+    // В многострочном поле перевод строки осмыслен, в однострочных - нет:
+    // там он служит только тому, чтобы разорвать значение на две строки.
+    return keepNewlines
+      ? text.replace(/[\u0000-\u0009\u000B-\u001F\u007F]/g, " ")
+      : text.replace(/[\u0000-\u001F\u007F]/g, " ");
+  }
+
+  function cleanLine(value, limit) {
+    return stripControl(value, false).replace(/ {2,}/g, " ").trim().slice(0, limit);
+  }
+
+  function cleanText(value, limit) {
+    return stripControl(value, true).replace(/\n{3,}/g, "\n\n").trim().slice(0, limit);
+  }
+
+  // Намеренно нестрогая проверка email: задача - отсечь опечатку и мусор, а
+  // не соответствие RFC. Полная проверка адреса возможна только письмом.
+  var EMAIL = /^[^\s@]{1,64}@[^\s@.]+(?:\.[^\s@.]{2,})+$/;
+
+  function looksLikeEmail(value) {
+    return EMAIL.test(value);
+  }
+
+  // Телефон: только цифры и обычные разделители, длина в пределах E.164
+  // (максимум 15 цифр) и не короче семи - иначе это не номер.
+  function looksLikePhone(value) {
+    if (!/^\+?[\d\s().-]+$/.test(value)) return false;
+    var digits = value.replace(/\D/g, "");
+    return digits.length >= 7 && digits.length <= 15;
+  }
+
+  function read(fields) {
+    return {
+      name: cleanLine(fields.name.value, LIMITS.name),
+      contact: cleanLine(fields.contact.value, LIMITS.contact),
+      message: cleanText(fields.message.value, LIMITS.message)
+    };
+  }
+
+  // Возвращает первую ошибку или null. Первую, а не все сразу: список из
+  // трёх претензий под формой читается хуже, чем одна подсвеченная строка.
+  function validate(data) {
+    if (!data.name) return { field: "name", message: "Укажите имя." };
+    if (data.name.length < 2) return { field: "name", message: "Имя слишком короткое - минимум два символа." };
+    if (!/\p{L}/u.test(data.name)) return { field: "name", message: "В имени должны быть буквы." };
+
+    if (!data.contact) return { field: "contact", message: "Укажите контакт, иначе ответить будет некуда." };
+    if (!looksLikeEmail(data.contact) && !looksLikePhone(data.contact)) {
+      return { field: "contact", message: "Не похоже на email или телефон - проверьте контакт." };
+    }
+    return null;
+  }
+
+  function mark(field, invalid) {
+    if (!field) return;
+    if (invalid) {
+      field.classList.add("f-invalid");
+      field.setAttribute("aria-invalid", "true");
+    } else {
+      field.classList.remove("f-invalid");
+      field.removeAttribute("aria-invalid");
+    }
+  }
+
+  return { read: read, validate: validate, mark: mark, limits: LIMITS };
+})();
+</script>
+<script>
+(function () {
+  "use strict";
+  var root = document.documentElement;
+
+  function goToTop() {
+    // Мгновенно, без анимации: позиция должна быть детерминированной, а не
+    // результатом гонки анимации с перевёрсткой.
+    var prev = root.style.scrollBehavior;
+    root.style.scrollBehavior = "auto";
+    window.scrollTo(0, 0);
+    // Подстраховка: встречаются окружения, где window.scrollTo игнорируется,
+    // а прокрутка самим элементом отрабатывает.
+    if (window.scrollY !== 0 && document.body.firstElementChild) {
+      document.body.firstElementChild.scrollIntoView();
+    }
+    root.style.scrollBehavior = prev;
+  }
+
+  // Страница всегда открывается С НАЧАЛА, даже если в ссылке остался якорь.
+  // Ссылка вида .../#stack — это то, что попадало в адресную строку после
+  // клика по меню; открытая потом в новой вкладке, она показывала середину
+  // страницы вместо начала. Одностраничный лендинг читают сверху, ссылки на
+  // отдельную секцию тут ценности не несут, поэтому якорь при открытии
+  // снимается вместе с прокруткой наверх. Ждём шрифты: их загрузка сдвигает
+  // вёрстку уже ПОСЛЕ того, как браузер отработал переход по якорю, и без
+  // ожидания страница могла снова уехать вниз.
+  if (location.hash.length > 1) {
+    var settled = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
+    settled.then(function () {
+      goToTop();
+      history.replaceState(null, "", location.pathname + location.search);
+    });
+  }
+
+  // Клик по меню и кнопкам: саму прокрутку делает браузер штатно, мы её НЕ
+  // перехватываем — родной переход по якорю надёжнее любого ручного
+  // scrollIntoView и не может сломаться. Убираем только сам якорь из адреса,
+  // уже после перехода: иначе скопированная из адресной строки ссылка
+  // открывается с середины страницы, а не с начала — ровно та жалоба, из-за
+  // которой это и правится. replaceState меняет только URL и на идущую
+  // прокрутку не влияет. Побочно чинится и то, что повторный клик по тому же
+  // пункту меню раньше не срабатывал (адрес уже содержал этот якорь).
+  document.addEventListener("click", function (e) {
+    var link = e.target && e.target.closest ? e.target.closest('a[href^="#"]') : null;
+    if (!link || e.defaultPrevented) return;
+    setTimeout(function () {
+      if (location.hash) {
+        history.replaceState(null, "", location.pathname + location.search);
+      }
+    }, 120);
+  });
+})();
+</script>
+<script>
+(function () {
+  "use strict";
+
+  // ---------- FAQ-аккордеон ----------
+  // Открыт может быть только один вопрос сразу: так лендинг не растягивается
+  // на весь список ответов, когда человек просто просматривает вопросы.
+  var faqList = document.getElementById("faqList");
+  if (faqList) {
+    var items = Array.prototype.slice.call(faqList.querySelectorAll(".faq-item"));
+    items.forEach(function (item) {
+      var btn = item.querySelector(".faq-q");
+      btn.addEventListener("click", function () {
+        var willOpen = !item.classList.contains("is-open");
+        items.forEach(function (other) {
+          other.classList.remove("is-open");
+          other.querySelector(".faq-q").setAttribute("aria-expanded", "false");
+        });
+        if (willOpen) {
+          item.classList.add("is-open");
+          btn.setAttribute("aria-expanded", "true");
+        }
+      });
+    });
+  }
+
+  // ---------- табы «для кого» ----------
+  var tabsRoot = document.getElementById("usecaseTabs");
+  if (tabsRoot) {
+    var tabs = Array.prototype.slice.call(tabsRoot.querySelectorAll(".usecase-tab"));
+    tabs.forEach(function (tab) {
+      tab.addEventListener("click", function () {
+        var panelId = tab.getAttribute("aria-controls");
+        tabs.forEach(function (t) {
+          t.classList.toggle("is-active", t === tab);
+          t.setAttribute("aria-selected", t === tab ? "true" : "false");
+        });
+        Array.prototype.forEach.call(document.querySelectorAll(".usecase-panel"), function (panel) {
+          panel.hidden = panel.id !== panelId;
+        });
+      });
+    });
+  }
+
+  // ---------- активная ссылка в навигации при прокрутке ----------
+  var navLinks = Array.prototype.slice.call(document.querySelectorAll("#navlinks a[data-nav]"));
+  if (navLinks.length && "IntersectionObserver" in window) {
+    var byId = {};
+    navLinks.forEach(function (link) {
+      byId[link.getAttribute("data-nav")] = link;
+    });
+    var setActive = function (id) {
+      navLinks.forEach(function (link) {
+        link.classList.toggle("is-active", link.getAttribute("data-nav") === id);
+      });
+    };
+    var sectionObserver = new IntersectionObserver(
+      function (entries) {
+        // Из всех секций, частично видимых сейчас, берём ближайшую к верху -
+        // иначе при двух видимых сразу подсветка дёргается между ними.
+        var visible = entries.filter(function (e) { return e.isIntersecting; });
+        if (!visible.length) return;
+        visible.sort(function (a, b) { return a.boundingClientRect.top - b.boundingClientRect.top; });
+        var id = visible[0].target.id;
+        if (byId[id]) setActive(id);
+      },
+      { rootMargin: "-40% 0px -50% 0px" }
+    );
+    Object.keys(byId).forEach(function (id) {
+      var section = document.getElementById(id);
+      if (section) sectionObserver.observe(section);
+    });
+  }
+
+  // ---------- липкая CTA-панель снизу ----------
+  var stickyCta = document.getElementById("stickyCta");
+  var heroSection = document.querySelector(".hero");
+  var feedbackSection = document.getElementById("feedback");
+  if (stickyCta && heroSection && feedbackSection && "IntersectionObserver" in window) {
+    var pastHero = false;
+    var atFeedback = false;
+    var sync = function () {
+      // Показываем панель только когда hero уже прокручен и форма заявки ещё
+      // не видна - иначе кнопка дублирует то, что и так на экране.
+      stickyCta.classList.toggle("is-visible", pastHero && !atFeedback);
+    };
+    new IntersectionObserver(
+      function (entries) { pastHero = !entries[0].isIntersecting; sync(); },
+      { threshold: 0 }
+    ).observe(heroSection);
+    new IntersectionObserver(
+      function (entries) { atFeedback = entries[0].isIntersecting; sync(); },
+      { threshold: 0.15 }
+    ).observe(feedbackSection);
+  }
+
+  // Клик по кнопке в липкой панели переводит фокус в поле «Имя»: меньше
+  // одного лишнего клика, чтобы начать заполнять форму.
+  var stickyCtaLink = document.getElementById("stickyCtaLink");
+  var nameField = document.getElementById("fbName");
+  if (stickyCtaLink && nameField) {
+    stickyCtaLink.addEventListener("click", function () {
+      window.setTimeout(function () { nameField.focus(); }, 350);
+    });
+  }
+})();
+</script>
+<script>
+(function () {
+  "use strict";
+  var RECIPIENT = "aleksandr.lomako@gmail.com";
+  // Страница статическая, своего сервера нет - отправку выполняет сервис
+  // доставки форм. Ключа и аккаунта не требует, адрес получателя прямо в URL.
+  var ENDPOINT = "https://formsubmit.co/ajax/" + RECIPIENT;
+
+  var form = document.getElementById("feedbackForm");
+  if (!form) return;
+  var btn = document.getElementById("fbSubmit");
+  var status = document.getElementById("fbStatus");
+  var nameField = document.getElementById("fbName");
+  var contactField = document.getElementById("fbContact");
+  var messageField = document.getElementById("fbMessage");
+  var honeyField = document.getElementById("fbHoney");
+  var FIELDS = { name: nameField, contact: contactField, message: messageField };
+
+  // Статус собирается узлами, а не разметкой: в него попадает адрес ссылкой,
+  // а рядом - пользовательский ввод, и склейка в innerHTML стала бы дырой.
+  function say(kind, parts) {
+    status.className = "f-status" + (kind ? " " + kind : "");
+    status.textContent = "";
+    parts.forEach(function (part) {
+      status.appendChild(typeof part === "string" ? document.createTextNode(part) : part);
+    });
+  }
+
+  function mailLink() {
+    var a = document.createElement("a");
+    a.href = "mailto:" + RECIPIENT;
+    a.textContent = RECIPIENT;
+    return a;
+  }
+
+  // Подсветка и текст ошибки снимаются, как только человек начал править
+  // поле: иначе страница показывает ошибку, которой уже нет. Сообщение об
+  // успешной отправке при этом не трогаем - оно остаётся верным.
+  [nameField, contactField].forEach(function (field) {
+    field.addEventListener("input", function () {
+      window.LoMeetForm.mark(field, false);
+      if (status.classList.contains("err")) say("", []);
+    });
+  });
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var data = window.LoMeetForm.read(FIELDS);
+
+    // Правила заполнения общие с главной страницей - см. LoMeetForm.
+    window.LoMeetForm.mark(nameField, false);
+    window.LoMeetForm.mark(contactField, false);
+    var problem = window.LoMeetForm.validate(data);
+    if (problem) {
+      var bad = FIELDS[problem.field];
+      window.LoMeetForm.mark(bad, true);
+      say("err", [problem.message]);
+      bad.focus();
+      return;
+    }
+
+    // Заполненная ловушка означает бота: показываем обычный ответ и никуда
+    // ничего не отправляем.
+    if (honeyField && honeyField.value) {
+      say("ok", ["Заявка отправлена. Я свяжусь с вами по указанному контакту."]);
+      form.reset();
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = "Отправляю...";
+    say("", ["Отправляю заявку..."]);
+
+    fetch(ENDPOINT, {
+      method: "POST",
+      // Политика реферера задана явно, а не оставлена на умолчание браузера.
+      // Сервис заводит ОТДЕЛЬНУЮ запись формы на каждый адрес-источник и
+      // требует активации для каждой. Умолчание разное у разных браузеров
+      // (домен против полного пути), поэтому без этой строки часть
+      // посетителей попадала бы в неактивированную запись и их заявка
+      // молча не доходила бы.
+      referrerPolicy: "strict-origin-when-cross-origin",
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      body: JSON.stringify({
+        _subject: "Заявка с лендинга LoMeet",
+        _template: "table",
+        // Капча несовместима с фоновой отправкой: с ней сервис ждёт человека
+        // на своей странице, а мы её не показываем.
+        _captcha: "false",
+        "Имя": data.name,
+        "Контакт": data.contact,
+        "Сообщение": data.message || "(не заполнено)"
+      })
+    })
+      .then(function (res) {
+        return res.json().catch(function () { return {}; }).then(function (payload) {
+          return { ok: res.ok, payload: payload };
+        });
+      })
+      .then(function (result) {
+        if (!result.ok || String(result.payload.success) !== "true") {
+          throw new Error("не отправлено");
+        }
+        say("ok", ["Заявка отправлена. Я свяжусь с вами по указанному контакту."]);
+        form.reset();
+      })
+      .catch(function () {
+        // Адрес показываем сразу: иначе при сбое человек остаётся с потерянной
+        // заявкой и без понимания, куда писать.
+        say("err", [
+          "Отправить не удалось. Попробуйте ещё раз или напишите на ",
+          mailLink(),
+          " - заявка не потеряется."
+        ]);
+      })
+      .then(function () {
+        btn.disabled = false;
+        btn.textContent = "Отправить заявку";
+      });
+  });
+})();
+</script>
+
+</body>
+</html>
