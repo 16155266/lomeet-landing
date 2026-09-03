@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'sha256-0iPXgOUUJP0PlkgjJbEMBNw5wp3Hwu62GJiPw/4z/uc=' https://fonts.googleapis.com; script-src 'sha256-RCIUS0h3BbtEPJ85sP4xYn5rQHySrkZggVMUE8BA450=' 'sha256-Ysti+tuS4HipG/qWNXn2gdP825xiXK/hPvlUxEtURpw=' 'sha256-EhgLUH6hwO8TvXruI6ujHnMHKSSqezi8pwOLQ19xzns=' 'sha256-QHhBK9dmVN3xM8njaHKjy6T/q3Bqdd5NrnTs26ZCESI='; connect-src https://formsubmit.co">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'sha256-G1wjrZZFFNzeLXWdrPtH+KLgxCwqmUiMqXCI4R1s4Jc=' https://fonts.googleapis.com; script-src 'sha256-RCIUS0h3BbtEPJ85sP4xYn5rQHySrkZggVMUE8BA450=' 'sha256-Ysti+tuS4HipG/qWNXn2gdP825xiXK/hPvlUxEtURpw=' 'sha256-EhgLUH6hwO8TvXruI6ujHnMHKSSqezi8pwOLQ19xzns=' 'sha256-QHhBK9dmVN3xM8njaHKjy6T/q3Bqdd5NrnTs26ZCESI='; connect-src https://formsubmit.co">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="robots" content="noindex">
 <meta name="description" content="LoMeet — локальный рекордер встреч для macOS: запись, расшифровка и саммари прямо на устройстве, без бота в звонке и без облака.">
@@ -342,6 +342,7 @@
   .f-row input::placeholder, .f-row textarea::placeholder{color:var(--ink-faint);}
   .f-row input:focus, .f-row textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim);}
   .f-actions{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:4px;}
+  .f-trap{position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden;}
   .f-hint{font-size:13px;color:var(--ink-faint);max-width:36ch;}
   .f-status{font-size:13px;color:var(--accent-bright);font-family:"Oswald",sans-serif;letter-spacing:.02em;}
   .f-status.ok{color:var(--good);}
@@ -519,7 +520,7 @@
         <div class="fact-strip">
           <div class="fact"><b>0</b><span>серверов, куда уходит звук</span></div>
           <div class="fact"><b>0 ₽</b><span>подписки - платить некому</span></div>
-          <div class="fact"><b>5</b><span>локальных процессов вместо облака</span></div>
+          <div class="fact"><b>1</b><span>место хранения записи - папка на вашем Mac</span></div>
         </div>
       </div>
 
