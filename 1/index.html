@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'sha256-SPN6IdgBMJbAdMh/mL7qdQOi18Vm94ss3ZXbnZtu1sU=' https://fonts.googleapis.com; script-src 'sha256-sCtr4JM2GJF3/bhjyte9X2V/9UykXkpTAezVgetT87Q='; connect-src https://formsubmit.co">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'sha256-G1wjrZZFFNzeLXWdrPtH+KLgxCwqmUiMqXCI4R1s4Jc=' https://fonts.googleapis.com; script-src 'sha256-RCIUS0h3BbtEPJ85sP4xYn5rQHySrkZggVMUE8BA450=' 'sha256-Ysti+tuS4HipG/qWNXn2gdP825xiXK/hPvlUxEtURpw=' 'sha256-EhgLUH6hwO8TvXruI6ujHnMHKSSqezi8pwOLQ19xzns=' 'sha256-QHhBK9dmVN3xM8njaHKjy6T/q3Bqdd5NrnTs26ZCESI='; connect-src https://formsubmit.co">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="robots" content="noindex">
 <meta name="description" content="LoMeet — локальный рекордер встреч для macOS: запись, расшифровка и саммари прямо на устройстве, без бота в звонке и без облака.">
@@ -342,6 +342,7 @@
   .f-row input::placeholder, .f-row textarea::placeholder{color:var(--ink-faint);}
   .f-row input:focus, .f-row textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim);}
   .f-actions{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:4px;}
+  .f-trap{position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden;}
   .f-hint{font-size:13px;color:var(--ink-faint);max-width:36ch;}
   .f-status{font-size:13px;color:var(--accent-bright);font-family:"Oswald",sans-serif;letter-spacing:.02em;}
   .f-status.ok{color:var(--good);}
@@ -385,8 +386,107 @@
   .u-mb-0{margin-bottom:0;}
   .u-brand-sm{font-size:15px;}
 
-  /* Ловушка для ботов: человек этого поля не видит и не заполняет. */
-  .f-trap{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;}
+  /* ---------- v4: активная ссылка в навигации при прокрутке ---------- */
+  .navlinks a.is-active{color:var(--accent-bright);}
+
+  /* ---------- v4: строка фактов под hero ---------- */
+  .fact-strip{
+    display:flex;flex-wrap:wrap;gap:0;
+    margin-top:40px;
+    border-top:1px solid var(--line-soft);
+    border-bottom:1px solid var(--line-soft);
+  }
+  .fact{
+    flex:1 1 160px;
+    padding:18px 22px 18px 0;
+    border-right:1px solid var(--line-soft);
+  }
+  .fact:last-child{border-right:none;}
+  .fact b{
+    display:block;font-family:"Unbounded",sans-serif;font-size:26px;font-weight:700;color:var(--ink);
+  }
+  .fact span{
+    display:block;margin-top:4px;font-family:"Oswald",sans-serif;font-size:12.5px;letter-spacing:.03em;color:var(--ink-faint);
+  }
+  @media (max-width:720px){
+    .fact{flex:1 1 45%;padding:16px 16px 16px 0;}
+  }
+
+  /* ---------- v4: три стадии «до / во время / после» ---------- */
+  .stages{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line-soft);border:1px solid var(--line-soft);border-radius:16px;overflow:hidden;margin-top:44px;}
+  @media (max-width:820px){ .stages{grid-template-columns:1fr;} }
+  .stage{background:var(--bg-panel);padding:32px 28px;}
+  .stage-num{
+    font-family:"Oswald",sans-serif;font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--accent);display:flex;align-items:center;gap:8px;
+  }
+  .stage-num::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent);flex:none;}
+  .stage h3{margin-top:14px;font-size:19px;}
+  .stage p{margin-top:10px;color:var(--ink-soft);font-size:15px;line-height:1.55;}
+  .stage .tag{
+    display:inline-block;margin-top:16px;
+    font-family:"Oswald",sans-serif;font-size:11.5px;letter-spacing:.03em;text-transform:uppercase;
+    color:var(--ink-faint);border:1px solid var(--line);border-radius:100px;padding:5px 12px;
+  }
+
+  /* ---------- v4: табы «для кого» ---------- */
+  .usecase-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-top:32px;}
+  .usecase-tab{
+    font-family:"Oswald",sans-serif;font-size:13px;letter-spacing:.03em;
+    background:transparent;border:1px solid var(--line);border-radius:100px;
+    padding:9px 18px;color:var(--ink-soft);cursor:pointer;
+  }
+  .usecase-tab.is-active{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);}
+  .usecase-panel{
+    margin-top:24px;background:var(--bg-panel);border:1px solid var(--line);border-radius:14px;
+    padding:28px 30px;
+  }
+  .usecase-panel[hidden]{display:none;}
+  .usecase-panel p{color:var(--ink-soft);font-size:16px;line-height:1.6;max-width:64ch;}
+  .usecase-panel .usecase-note{
+    margin-top:14px;font-family:"Oswald",sans-serif;font-size:12px;letter-spacing:.03em;color:var(--ink-faint);
+  }
+
+  /* ---------- v4: FAQ-аккордеон ---------- */
+  .faq-list{margin-top:32px;border-top:1px solid var(--line-soft);}
+  .faq-item{border-bottom:1px solid var(--line-soft);}
+  .faq-q{
+    width:100%;text-align:left;background:transparent;border:none;cursor:pointer;
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+    padding:20px 2px;font-family:"Unbounded",sans-serif;font-size:16.5px;color:var(--ink);
+  }
+  .faq-q:hover{color:var(--accent-bright);}
+  .faq-q .plus{
+    flex:none;width:22px;height:22px;position:relative;
+  }
+  .faq-q .plus::before, .faq-q .plus::after{
+    content:"";position:absolute;background:var(--ink-faint);border-radius:2px;
+  }
+  .faq-q .plus::before{left:0;top:9px;width:22px;height:2px;}
+  .faq-q .plus::after{left:9px;top:0;width:2px;height:22px;transition:transform .15s ease;}
+  .faq-item.is-open .faq-q .plus::after{transform:rotate(90deg);}
+  .faq-item.is-open .faq-q{color:var(--accent-bright);}
+  .faq-a{
+    max-height:0;overflow:hidden;transition:max-height .2s ease;
+  }
+  .faq-item.is-open .faq-a{max-height:400px;}
+  .faq-a p{padding:0 2px 20px;color:var(--ink-soft);font-size:15px;line-height:1.6;max-width:64ch;}
+
+  /* ---------- v4: липкая CTA-панель снизу ---------- */
+  .sticky-cta{
+    position:fixed;left:0;right:0;bottom:0;z-index:30;
+    display:flex;align-items:center;justify-content:center;gap:18px;flex-wrap:wrap;
+    padding:14px 20px;
+    background:rgba(20,18,15,0.92);backdrop-filter:blur(10px);
+    border-top:1px solid var(--line-soft);
+    transform:translateY(100%);transition:transform .25s ease;
+  }
+  .sticky-cta.is-visible{transform:translateY(0);}
+  .sticky-cta span{font-family:"Oswald",sans-serif;font-size:13.5px;color:var(--ink-soft);}
+  @media (max-width:560px){ .sticky-cta span{display:none;} }
+
+  /* На узких экранах нижняя панель не должна закрывать форму заявки. */
+  #feedback{scroll-margin-bottom:80px;}
 </style>
 </head>
 <body>
@@ -395,12 +495,12 @@
 <div class="topbar">
   <div class="wrap">
     <div class="brand"><span class="dot"></span>LoMeet</div>
-    <nav class="navlinks">
-      <a href="#features">Что внутри</a>
-      <a href="#compare">Сравнение</a>
-      <a href="#ask">Умный поиск</a>
-      <a href="#stack">Начинка</a>
-      <a href="#feedback">Написать</a>
+    <nav class="navlinks" id="navlinks">
+      <a href="#stages" data-nav="stages">Как это работает</a>
+      <a href="#compare" data-nav="compare">Сравнение</a>
+      <a href="#usecases" data-nav="usecases">Для кого</a>
+      <a href="#faq" data-nav="faq">Вопросы</a>
+      <a href="#feedback" data-nav="feedback">Написать</a>
     </nav>
   </div>
 </div>
@@ -413,13 +513,14 @@
         <h1>Встреча.<br>Ваш Mac.<br><span class="accent-word">Больше никто.</span></h1>
         <p class="lede">LoMeet записывает звонок, расшифровывает и собирает саммари прямо на вашем компьютере. Без бота в списке участников, без загрузки на сервер, без аккаунта.</p>
         <div class="hero-ctas">
-          <a class="btn btn-primary" href="#compare">Сравнить с облачными ботами</a>
-          <a class="btn btn-ghost" href="#stack">Как это устроено</a>
+          <a class="btn btn-primary" href="#feedback">Оставить заявку на бету</a>
+          <a class="btn btn-ghost" href="#stages">Как это устроено</a>
         </div>
-        <div class="hero-meta">
-          <span>живёт в меню-баре</span><span>·</span>
-          <span>записи хранятся в локальной папке на Mac</span><span>·</span>
-          <span>ничего не уходит с машины</span>
+
+        <div class="fact-strip">
+          <div class="fact"><b>0</b><span>серверов, куда уходит звук</span></div>
+          <div class="fact"><b>$0</b><span>подписки - платить некому</span></div>
+          <div class="fact"><b>1</b><span>место хранения записи - папка на вашем Mac</span></div>
         </div>
       </div>
 
@@ -448,7 +549,7 @@
           </div>
         </div>
         <div class="mock-foot">
-          <span>v0.10.0 · сборка 97</span>
+          <span>v0.12.0</span>
           <span>3 встречи сегодня</span>
         </div>
       </div>
@@ -456,44 +557,32 @@
   </div>
 </section>
 
-<section id="features">
+<section id="stages">
   <div class="wrap">
     <div class="section-head">
-      <div class="eyebrow">что внутри</div>
-      <h2>Всё, что обычно делает облако - только не в облаке</h2>
-      <p>Захват, расшифровка, разбор по спикерам, саммари и поиск по истории встреч - каждый этап выполняется локально, теми же движками, что стоят за большими сервисами, только без сети.</p>
+      <div class="eyebrow">как это работает</div>
+      <h2>Три момента, три разных инструмента - все на одном Mac</h2>
+      <p>Ничего не откладывается «на потом в облаке». Каждый этап делает своя локальная модель, сразу на месте.</p>
     </div>
 
-    <div class="grid">
-      <div class="card">
-        <div class="num">01</div>
-        <h3>Запись без бота</h3>
-        <p>Никто не видит участника «LoMeet Notetaker» в списке звонящих - потому что его там нет. Звук пишется прямо с устройства через ffmpeg, мимо API площадки видеосвязи.</p>
+    <div class="stages">
+      <div class="stage">
+        <div class="stage-num">Пока вы говорите</div>
+        <h3>Запись без участника «LoMeet»</h3>
+        <p>Звук пишется прямо с устройства через ffmpeg - мимо API площадки видеосвязи. В списке участников звонка LoMeet не появляется, потому что технически в него не заходит.</p>
+        <span class="tag">ffmpeg · avfoundation</span>
       </div>
-      <div class="card">
-        <div class="num">02</div>
-        <h3>Расшифровка на месте</h3>
-        <p>faster-whisper распознаёт речь прямо на Mac. Аудиофайл никогда не покидает диск - его не нужно никуда загружать, чтобы получить текст.</p>
+      <div class="stage">
+        <div class="stage-num">Сразу после</div>
+        <h3>Расшифровка, спикеры, саммари</h3>
+        <p>faster-whisper распознаёт речь, sherpa-onnx размечает, кто говорит, Ollama собирает саммари - всё на этом же Mac, пока файл лежит на диске и никуда не отправлен.</p>
+        <span class="tag">faster-whisper · sherpa-onnx · Ollama</span>
       </div>
-      <div class="card">
-        <div class="num">03</div>
-        <h3>Кто говорит</h3>
-        <p>Разбор по спикерам - тоже локально, sherpa-onnx, без аккаунта и токена доступа. Просто работает после первого запуска.</p>
-      </div>
-      <div class="card">
-        <div class="num">04</div>
-        <h3>Саммари локальной моделью</h3>
-        <p>Ollama строит саммари прямо на устройстве - без ключа OpenAI, без счёта за токены, без отправки транскрипта куда-либо.</p>
-      </div>
-      <div class="card">
-        <div class="num">05</div>
-        <h3>Выбор источника</h3>
-        <p>Экран, конкретное окно или только звук.</p>
-      </div>
-      <div class="card">
-        <div class="num">06</div>
-        <h3>Умный поиск</h3>
-        <p>Чат по всей истории встреч с переходом к нужному моменту записи по клику - см. следующий раздел.</p>
+      <div class="stage">
+        <div class="stage-num">Через месяц</div>
+        <h3>Один вопрос - весь архив встреч</h3>
+        <p>«Что решили по срокам в июле?» - умный поиск находит ответ по всей истории транскриптов и саммари, а не только по одной записи, и указывает, из какой встречи он взят.</p>
+        <span class="tag">эмбеддинги · умный поиск</span>
       </div>
     </div>
   </div>
@@ -501,33 +590,17 @@
 
 <section id="preview">
   <div class="wrap">
-    <div class="section-head">
-      <div class="eyebrow">как это выглядит</div>
-    </div>
-    <div class="preview-grid">
-      <div class="mock small" role="img" aria-label="Макет карточки саммари встречи: резюме и список задач по участникам">
-        <div class="mock-title"><span>Саммари встречи</span><span class="u-faint">31.08, 13:01</span></div>
-        <div class="mock-body">
-          <div class="summary-h">Резюме</div>
-          <ul class="summary-list">
-            <li>Согласовали перенос релиза каталога на вторник</li>
-            <li>Блокер - приёмка карточек товара не готова к среде</li>
-          </ul>
-          <div class="summary-h second">Задачи</div>
-          <ul class="summary-list">
-            <li><b>Виктор</b> - доделать карточки до пятницы</li>
-            <li><b>Полина</b> - согласовать текст с заказчиком</li>
-          </ul>
-        </div>
+    <div class="ask-wrap">
+      <div>
+        <div class="eyebrow">умный поиск</div>
+        <h2 class="u-h2-tight">Клик по источнику - и плеер сам находит момент в записи</h2>
+        <p class="lede u-mt-16">Ответ приходит не «из воздуха»: под ним видно, из какой встречи и с какой секунды он взят. Один клик - и плеер перематывает ровно туда.</p>
       </div>
-      <div class="mock small" role="img" aria-label="Макет вкладки настроек: выбор микрофона, звука встречи, экрана и модели распознавания">
-        <div class="mock-title"><span>Настройки</span></div>
-        <div class="mock-body">
-          <div class="settings-row"><span class="settings-key">Микрофон</span><span class="settings-val">Микрофон MacBook Air</span></div>
-          <div class="settings-row"><span class="settings-key">Звук встречи</span><span class="settings-val">BlackHole 2ch</span></div>
-          <div class="settings-row"><span class="settings-key">Экран</span><span class="settings-val">Не записывать</span></div>
-          <div class="settings-row"><span class="settings-key">Модель Whisper</span><span class="settings-val">medium</span></div>
-          <div class="settings-row"><span class="settings-key">По спикерам</span><span class="settings-val">Включено</span></div>
+      <div class="chat">
+        <div class="bubble q">Что решили по срокам запуска каталога?</div>
+        <div class="bubble a">
+          Договорились перенести релиз на вторник после демо - блокер был в приёмке карточек товара.
+          <span class="src">Источник: «Демо 12.08», 14:32</span>
         </div>
       </div>
     </div>
@@ -589,21 +662,36 @@
   </div>
 </section>
 
-<section id="ask">
+<section id="usecases">
   <div class="wrap">
-    <div class="ask-wrap">
-      <div>
-        <div class="eyebrow">умный поиск</div>
-        <h2 class="u-h2-tight">Задайте вопрос всей истории встреч - не одной записи</h2>
-        <p class="lede u-mt-16">«Что мы решили по срокам в июле?» - LoMeet ищет ответ по транскриптам и саммари всех прошлых встреч и указывает, из какой именно записи и с какого момента взят ответ. Клик по источнику - и плеер сразу перематывает к нужной секунде.</p>
-      </div>
-      <div class="chat">
-        <div class="bubble q">Что решили по срокам запуска каталога?</div>
-        <div class="bubble a">
-          Договорились перенести релиз на вторник после демо - блокер был в приёмке карточек товара.
-          <span class="src">Источник: «Демо 12.08», 14:32</span>
-        </div>
-      </div>
+    <div class="section-head">
+      <div class="eyebrow">для кого</div>
+      <h2>Кому в первую очередь пригодится локальная запись</h2>
+      <p>Ниже - типичные сценарии, а не отзывы реальных пользователей: LoMeet ещё в закрытой бете.</p>
+    </div>
+
+    <div class="usecase-tabs" role="tablist" id="usecaseTabs">
+      <button class="usecase-tab is-active" role="tab" aria-selected="true" aria-controls="usecase-pm" id="tab-pm">Проектный менеджер</button>
+      <button class="usecase-tab" role="tab" aria-selected="false" aria-controls="usecase-freelance" id="tab-freelance">Фрилансер-консультант</button>
+      <button class="usecase-tab" role="tab" aria-selected="false" aria-controls="usecase-dev" id="tab-dev">Разработчик</button>
+      <button class="usecase-tab" role="tab" aria-selected="false" aria-controls="usecase-interview" id="tab-interview">Соискатель на собеседовании</button>
+    </div>
+
+    <div class="usecase-panel" id="usecase-pm" role="tabpanel" aria-labelledby="tab-pm">
+      <p>Демо с заказчиком, синки с командой, встречи со стейкхолдерами - за день их несколько, и держать в голове, кто что пообещал, тяжело. Саммари и умный поиск по всей истории встреч закрывают именно это: не нужно пересматривать запись, чтобы вспомнить, на чём сошлись по срокам.</p>
+      <div class="usecase-note">Заказчик слышит только вас - бот в список участников не заходит.</div>
+    </div>
+    <div class="usecase-panel" id="usecase-freelance" role="tabpanel" aria-labelledby="tab-freelance" hidden>
+      <p>Созвоны с разными клиентами часто идут в разных сервисах видеосвязи - Zoom, Meet, Teams, иногда просто звонок в мессенджере. LoMeet пишет звук с устройства, а не через API конкретной площадки, поэтому ему не важно, где именно идёт разговор.</p>
+      <div class="usecase-note">Расшифровка и саммари не зависят от того, даёт ли платформа встречи доступ к записи.</div>
+    </div>
+    <div class="usecase-panel" id="usecase-dev" role="tabpanel" aria-labelledby="tab-dev" hidden>
+      <p>Разбор архитектуры, ревью решений, обсуждение бага с коллегой - такие встречи полезно перечитать текстом, а не искать нужный момент на слух. Каждый компонент конвейера - отдельный локальный процесс, который видно в Activity Monitor и который можно остановить в любой момент.</p>
+      <div class="usecase-note">Транскрипт и аудио не покидают диск - ни на одном этапе обработки.</div>
+    </div>
+    <div class="usecase-panel" id="usecase-interview" role="tabpanel" aria-labelledby="tab-interview" hidden>
+      <p>Записывать разговор с потенциальным работодателем через облачный сервис означает отправить его на сервер третьей стороны. LoMeet держит запись только на вашем диске - решать, кому её показывать, целиком остаётся за вами.</p>
+      <div class="usecase-note">Ничего не синхронизируется в фоне и не требует аккаунта, привязанного к рабочей почте.</div>
     </div>
   </div>
 </section>
@@ -625,12 +713,48 @@
   </div>
 </section>
 
+<section id="faq">
+  <div class="wrap">
+    <div class="section-head u-mb-0">
+      <div class="eyebrow">вопросы</div>
+      <h2>Что обычно спрашивают до установки</h2>
+    </div>
+
+    <div class="faq-list" id="faqList">
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">Работает не на macOS?<span class="plus" aria-hidden="true"></span></button>
+        <div class="faq-a"><p>Сейчас - только macOS, это основная и единственно проверенная вживую версия. Порт под Windows есть в коде (тот же захват экрана и звука, расшифровка, саммари), но ни разу не запускался на реальной Windows-машине - объявим отдельно, когда это будет честно проверено, а не просто написано.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">Нужен аккаунт или подписка?<span class="plus" aria-hidden="true"></span></button>
+        <div class="faq-a"><p>Нет. Регистрации нет, потому что нечему отправлять данные - сервера, который бы их принимал, у LoMeet просто не существует. По той же причине нет и подписки: обработка идёт на вашей вычислительной мощности, а не на арендованной у вендора.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">Куда физически попадает запись?<span class="plus" aria-hidden="true"></span></button>
+        <div class="faq-a"><p>В локальную папку на вашем диске - аудио, видео (если включено), транскрипт и саммари лежат обычными файлами. Ничего не синхронизируется в облако автоматически.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">Что нужно поставить, кроме самого приложения?<span class="plus" aria-hidden="true"></span></button>
+        <div class="faq-a"><p>ffmpeg - для захвата и склейки звука/видео, Ollama - для саммари и умного поиска, и виртуальное аудиоустройство (BlackHole) - чтобы писать звук встречи, а не только микрофон. Список честный: без них часть функций работать не будет.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">Как получить доступ сейчас?<span class="plus" aria-hidden="true"></span></button>
+        <div class="faq-a"><p>LoMeet в закрытой бете. Форма ниже - это заявка на подключение, а не на рассылку новостей: ответ придёт на указанный контакт.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">Что будет, если удалить или остановить приложение?<span class="plus" aria-hidden="true"></span></button>
+        <div class="faq-a"><p>Уже сделанные записи и файлы остаются в локальной папке - они не привязаны к работающему процессу приложения и никуда не пропадают вместе с ним.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section class="closing">
   <div class="wrap">
     <div class="eyebrow">итого</div>
     <div class="closing-row">
       <h2>Запись встречи - это ваши данные. Пусть они и остаются вашими.</h2>
-      <a class="btn btn-primary" href="#features">Смотреть, что внутри</a>
+      <a class="btn btn-primary" href="#feedback">Оставить заявку на бету</a>
     </div>
   </div>
 </section>
@@ -638,9 +762,10 @@
 <section id="feedback">
   <div class="wrap">
     <div class="section-head">
-      <div class="eyebrow">обратная связь</div>
+      <div class="eyebrow">заявка</div>
       <h2>Хотите установить себе? Оставьте заявку - и присоединяйтесь к закрытому бета-тестированию</h2>
     </div>
+
     <form class="feedback-form" id="feedbackForm" novalidate>
       <div class="f-row">
         <label for="fbName">Имя</label>
@@ -673,63 +798,12 @@
   </div>
 </footer>
 
+<div class="sticky-cta" id="stickyCta">
+  <span>Готовы попробовать локальную запись?</span>
+  <a class="btn btn-primary" href="#feedback" id="stickyCtaLink">Оставить заявку</a>
+</div>
+
 <script>
-(function () {
-  "use strict";
-  var root = document.documentElement;
-
-  function goToTop() {
-    // Мгновенно, без анимации: позиция должна быть детерминированной, а не
-    // результатом гонки анимации с перевёрсткой.
-    var prev = root.style.scrollBehavior;
-    root.style.scrollBehavior = "auto";
-    window.scrollTo(0, 0);
-    // Подстраховка: встречаются окружения, где window.scrollTo игнорируется,
-    // а прокрутка самим элементом отрабатывает.
-    if (window.scrollY !== 0 && document.body.firstElementChild) {
-      document.body.firstElementChild.scrollIntoView();
-    }
-    root.style.scrollBehavior = prev;
-  }
-
-  // Страница всегда открывается С НАЧАЛА, даже если в ссылке остался якорь.
-  // Ссылка вида .../#stack — это то, что попадало в адресную строку после
-  // клика по меню; открытая потом в новой вкладке, она показывала середину
-  // страницы вместо начала. Одностраничный лендинг читают сверху, ссылки на
-  // отдельную секцию тут ценности не несут, поэтому якорь при открытии
-  // снимается вместе с прокруткой наверх. Ждём шрифты: их загрузка сдвигает
-  // вёрстку уже ПОСЛЕ того, как браузер отработал переход по якорю, и без
-  // ожидания страница могла снова уехать вниз.
-  if (location.hash.length > 1) {
-    var settled = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
-    settled.then(function () {
-      goToTop();
-      history.replaceState(null, "", location.pathname + location.search);
-    });
-  }
-
-  // Клик по меню и кнопкам: саму прокрутку делает браузер штатно, мы её НЕ
-  // перехватываем — родной переход по якорю надёжнее любого ручного
-  // scrollIntoView и не может сломаться. Убираем только сам якорь из адреса,
-  // уже после перехода: иначе скопированная из адресной строки ссылка
-  // открывается с середины страницы, а не с начала — ровно та жалоба, из-за
-  // которой это и правится. replaceState меняет только URL и на идущую
-  // прокрутку не влияет. Побочно чинится и то, что повторный клик по тому же
-  // пункту меню раньше не срабатывал (адрес уже содержал этот якорь).
-  document.addEventListener("click", function (e) {
-    var link = e.target && e.target.closest ? e.target.closest('a[href^="#"]') : null;
-    if (!link || e.defaultPrevented) return;
-    setTimeout(function () {
-      if (location.hash) {
-        history.replaceState(null, "", location.pathname + location.search);
-      }
-    }, 120);
-  });
-})();
-
-// Проверка полей вынесена из обработчика формы и живёт отдельно: страница
-// /1/ отправляет заявку другим способом, но правила заполнения у обеих
-// страниц обязаны быть одни и те же, иначе они разъедутся при первой правке.
 window.LoMeetForm = (function () {
   "use strict";
 
@@ -806,7 +880,169 @@ window.LoMeetForm = (function () {
 
   return { read: read, validate: validate, mark: mark, limits: LIMITS };
 })();
+</script>
+<script>
+(function () {
+  "use strict";
+  var root = document.documentElement;
 
+  function goToTop() {
+    // Мгновенно, без анимации: позиция должна быть детерминированной, а не
+    // результатом гонки анимации с перевёрсткой.
+    var prev = root.style.scrollBehavior;
+    root.style.scrollBehavior = "auto";
+    window.scrollTo(0, 0);
+    // Подстраховка: встречаются окружения, где window.scrollTo игнорируется,
+    // а прокрутка самим элементом отрабатывает.
+    if (window.scrollY !== 0 && document.body.firstElementChild) {
+      document.body.firstElementChild.scrollIntoView();
+    }
+    root.style.scrollBehavior = prev;
+  }
+
+  // Страница всегда открывается С НАЧАЛА, даже если в ссылке остался якорь.
+  // Ссылка вида .../#stack — это то, что попадало в адресную строку после
+  // клика по меню; открытая потом в новой вкладке, она показывала середину
+  // страницы вместо начала. Одностраничный лендинг читают сверху, ссылки на
+  // отдельную секцию тут ценности не несут, поэтому якорь при открытии
+  // снимается вместе с прокруткой наверх. Ждём шрифты: их загрузка сдвигает
+  // вёрстку уже ПОСЛЕ того, как браузер отработал переход по якорю, и без
+  // ожидания страница могла снова уехать вниз.
+  if (location.hash.length > 1) {
+    var settled = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
+    settled.then(function () {
+      goToTop();
+      history.replaceState(null, "", location.pathname + location.search);
+    });
+  }
+
+  // Клик по меню и кнопкам: саму прокрутку делает браузер штатно, мы её НЕ
+  // перехватываем — родной переход по якорю надёжнее любого ручного
+  // scrollIntoView и не может сломаться. Убираем только сам якорь из адреса,
+  // уже после перехода: иначе скопированная из адресной строки ссылка
+  // открывается с середины страницы, а не с начала — ровно та жалоба, из-за
+  // которой это и правится. replaceState меняет только URL и на идущую
+  // прокрутку не влияет. Побочно чинится и то, что повторный клик по тому же
+  // пункту меню раньше не срабатывал (адрес уже содержал этот якорь).
+  document.addEventListener("click", function (e) {
+    var link = e.target && e.target.closest ? e.target.closest('a[href^="#"]') : null;
+    if (!link || e.defaultPrevented) return;
+    setTimeout(function () {
+      if (location.hash) {
+        history.replaceState(null, "", location.pathname + location.search);
+      }
+    }, 120);
+  });
+})();
+</script>
+<script>
+(function () {
+  "use strict";
+
+  // ---------- FAQ-аккордеон ----------
+  // Открыт может быть только один вопрос сразу: так лендинг не растягивается
+  // на весь список ответов, когда человек просто просматривает вопросы.
+  var faqList = document.getElementById("faqList");
+  if (faqList) {
+    var items = Array.prototype.slice.call(faqList.querySelectorAll(".faq-item"));
+    items.forEach(function (item) {
+      var btn = item.querySelector(".faq-q");
+      btn.addEventListener("click", function () {
+        var willOpen = !item.classList.contains("is-open");
+        items.forEach(function (other) {
+          other.classList.remove("is-open");
+          other.querySelector(".faq-q").setAttribute("aria-expanded", "false");
+        });
+        if (willOpen) {
+          item.classList.add("is-open");
+          btn.setAttribute("aria-expanded", "true");
+        }
+      });
+    });
+  }
+
+  // ---------- табы «для кого» ----------
+  var tabsRoot = document.getElementById("usecaseTabs");
+  if (tabsRoot) {
+    var tabs = Array.prototype.slice.call(tabsRoot.querySelectorAll(".usecase-tab"));
+    tabs.forEach(function (tab) {
+      tab.addEventListener("click", function () {
+        var panelId = tab.getAttribute("aria-controls");
+        tabs.forEach(function (t) {
+          t.classList.toggle("is-active", t === tab);
+          t.setAttribute("aria-selected", t === tab ? "true" : "false");
+        });
+        Array.prototype.forEach.call(document.querySelectorAll(".usecase-panel"), function (panel) {
+          panel.hidden = panel.id !== panelId;
+        });
+      });
+    });
+  }
+
+  // ---------- активная ссылка в навигации при прокрутке ----------
+  var navLinks = Array.prototype.slice.call(document.querySelectorAll("#navlinks a[data-nav]"));
+  if (navLinks.length && "IntersectionObserver" in window) {
+    var byId = {};
+    navLinks.forEach(function (link) {
+      byId[link.getAttribute("data-nav")] = link;
+    });
+    var setActive = function (id) {
+      navLinks.forEach(function (link) {
+        link.classList.toggle("is-active", link.getAttribute("data-nav") === id);
+      });
+    };
+    var sectionObserver = new IntersectionObserver(
+      function (entries) {
+        // Из всех секций, частично видимых сейчас, берём ближайшую к верху -
+        // иначе при двух видимых сразу подсветка дёргается между ними.
+        var visible = entries.filter(function (e) { return e.isIntersecting; });
+        if (!visible.length) return;
+        visible.sort(function (a, b) { return a.boundingClientRect.top - b.boundingClientRect.top; });
+        var id = visible[0].target.id;
+        if (byId[id]) setActive(id);
+      },
+      { rootMargin: "-40% 0px -50% 0px" }
+    );
+    Object.keys(byId).forEach(function (id) {
+      var section = document.getElementById(id);
+      if (section) sectionObserver.observe(section);
+    });
+  }
+
+  // ---------- липкая CTA-панель снизу ----------
+  var stickyCta = document.getElementById("stickyCta");
+  var heroSection = document.querySelector(".hero");
+  var feedbackSection = document.getElementById("feedback");
+  if (stickyCta && heroSection && feedbackSection && "IntersectionObserver" in window) {
+    var pastHero = false;
+    var atFeedback = false;
+    var sync = function () {
+      // Показываем панель только когда hero уже прокручен и форма заявки ещё
+      // не видна - иначе кнопка дублирует то, что и так на экране.
+      stickyCta.classList.toggle("is-visible", pastHero && !atFeedback);
+    };
+    new IntersectionObserver(
+      function (entries) { pastHero = !entries[0].isIntersecting; sync(); },
+      { threshold: 0 }
+    ).observe(heroSection);
+    new IntersectionObserver(
+      function (entries) { atFeedback = entries[0].isIntersecting; sync(); },
+      { threshold: 0.15 }
+    ).observe(feedbackSection);
+  }
+
+  // Клик по кнопке в липкой панели переводит фокус в поле «Имя»: меньше
+  // одного лишнего клика, чтобы начать заполнять форму.
+  var stickyCtaLink = document.getElementById("stickyCtaLink");
+  var nameField = document.getElementById("fbName");
+  if (stickyCtaLink && nameField) {
+    stickyCtaLink.addEventListener("click", function () {
+      window.setTimeout(function () { nameField.focus(); }, 350);
+    });
+  }
+})();
+</script>
+<script>
 (function () {
   "use strict";
   var RECIPIENT = "aleksandr.lomako@gmail.com";
@@ -886,7 +1122,7 @@ window.LoMeetForm = (function () {
       // требует активации для каждой. Умолчание разное у разных браузеров
       // (домен против полного пути), поэтому без этой строки часть
       // посетителей попадала бы в неактивированную запись и их заявка
-      // молча не доходила бы. Активирована запись с адресом-доменом.
+      // молча не доходила бы.
       referrerPolicy: "strict-origin-when-cross-origin",
       headers: { "Content-Type": "application/json", "Accept": "application/json" },
       body: JSON.stringify({
