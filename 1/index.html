@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'sha256-G1wjrZZFFNzeLXWdrPtH+KLgxCwqmUiMqXCI4R1s4Jc=' https://fonts.googleapis.com; script-src 'sha256-RCIUS0h3BbtEPJ85sP4xYn5rQHySrkZggVMUE8BA450=' 'sha256-Ysti+tuS4HipG/qWNXn2gdP825xiXK/hPvlUxEtURpw=' 'sha256-EhgLUH6hwO8TvXruI6ujHnMHKSSqezi8pwOLQ19xzns=' 'sha256-QHhBK9dmVN3xM8njaHKjy6T/q3Bqdd5NrnTs26ZCESI='; connect-src https://formsubmit.co">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'sha256-P7vj7Iduc/Ulwjg3onYQqdWwBgcZpdwysc+gl61L2Lw=' https://fonts.googleapis.com; script-src 'sha256-RCIUS0h3BbtEPJ85sP4xYn5rQHySrkZggVMUE8BA450=' 'sha256-JKT6tPEuv1eCyjsj0NHl8osa5R2tTEq7mb9plzkvuIk=' 'sha256-EhgLUH6hwO8TvXruI6ujHnMHKSSqezi8pwOLQ19xzns=' 'sha256-QHhBK9dmVN3xM8njaHKjy6T/q3Bqdd5NrnTs26ZCESI='; connect-src https://formsubmit.co">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="robots" content="noindex">
 <meta name="description" content="LoMeet — локальный рекордер встреч для macOS: запись, расшифровка и саммари прямо на устройстве, без бота в звонке и без облака.">
@@ -132,6 +132,7 @@
     display:flex;align-items:center;gap:10px;
     font-family:"Unbounded",sans-serif;font-weight:700;font-size:18px;
     letter-spacing:-.01em;
+    color:inherit;text-decoration:none;cursor:pointer;
   }
   .brand .dot{
     width:11px;height:11px;border-radius:50%;
@@ -494,7 +495,7 @@
 
 <div class="topbar">
   <div class="wrap">
-    <div class="brand"><span class="dot"></span>LoMeet</div>
+    <a class="brand" href="#"><span class="dot"></span>LoMeet</a>
     <nav class="navlinks" id="navlinks">
       <a href="#stages" data-nav="stages">Как это работает</a>
       <a href="#compare" data-nav="compare">Сравнение</a>
@@ -927,6 +928,18 @@ window.LoMeetForm = (function () {
   document.addEventListener("click", function (e) {
     var link = e.target && e.target.closest ? e.target.closest('a[href^="#"]') : null;
     if (!link || e.defaultPrevented) return;
+    // Пустой фрагмент (href="#", логотип в шапке) браузер не всегда
+    // трактует как «прокрутить наверх» - в отличие от именованных якорей,
+    // это проверено вживую и оказалось ненадёжным. Скроллим сами тем же
+    // goToTop(), что и при открытии страницы с якорем в адресе.
+    if (link.getAttribute("href") === "#") {
+      e.preventDefault();
+      goToTop();
+      if (location.hash) {
+        history.replaceState(null, "", location.pathname + location.search);
+      }
+      return;
+    }
     setTimeout(function () {
       if (location.hash) {
         history.replaceState(null, "", location.pathname + location.search);
